@@ -1,0 +1,3000 @@
+﻿<!doctype html>
+<html lang="{{ language }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ title }}</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap">
+  {% if not pdf_mode %}
+  <script>
+    (() => {
+      try {
+        const savedTheme = window.localStorage.getItem("tribe-ui-theme");
+        document.documentElement.setAttribute("data-tribe-theme", savedTheme === "light" ? "light" : "dark");
+      } catch (error) {
+        document.documentElement.setAttribute("data-tribe-theme", "dark");
+      }
+    })();
+  </script>
+  {% endif %}
+  <style>
+    :root {
+      --bg: #1e1f1c;
+      --bg-2: #f5f4f0;
+      --card: #ffffff;
+      --panel: #ffffff;
+      --panel-2: #f7f6f2;
+      --ink: #111111;
+      --muted: #6f6f6b;
+      --line: #d9d8d2;
+      --line-soft: #ecebe5;
+      --soft: #f4f3ef;
+      --soft-2: #efeee8;
+      --shadow: 0 14px 36px rgba(0, 0, 0, 0.04);
+      --shadow-soft: 0 4px 14px rgba(0, 0, 0, 0.03);
+      --stage: #2d2e2a;
+      --chart-bg: #f6f5f1;
+      --chart-line: #111111;
+      --chart-line-soft: #8a8a86;
+      --chart-grid: #d9d8d2;
+      --chart-grid-soft: #e9e8e2;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: "Manrope", "Segoe UI Variable", "Segoe UI", sans-serif;
+      background-color: var(--bg);
+      background-image:
+        linear-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+      background-size: 36px 36px;
+      background-position: 0 0, 0 0;
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+    body:not(.pdf-mode) {
+      zoom: 0.85;
+    }
+    .wrap { width: min(1640px, calc(100% - 64px)); margin: 28px auto 72px; }
+    .hero, .card {
+      border: 1px solid var(--line);
+      border-radius: 34px;
+      background: var(--card);
+      box-shadow: var(--shadow);
+    }
+    .hero { padding: 40px; }
+    .stack { display: grid; gap: 24px; margin-top: 18px; }
+    h1, h2, h3, p { margin: 0; }
+    h1, h2, h3, .chip, .pill, button, .button-link { letter-spacing: -0.04em; }
+    h1 { margin-top: 12px; max-width: 1040px; font-size: clamp(40px, 5.2vw, 84px); line-height: 0.9; font-weight: 600; }
+    h2 { font-size: clamp(30px, 2.3vw, 42px); line-height: 0.94; font-weight: 700; }
+    h3 { font-size: 18px; line-height: 0.98; font-weight: 700; }
+    .lead { margin-top: 18px; max-width: 940px; color: var(--muted); line-height: 1.2; font-size: 18px; }
+    .chip {
+      display: inline-flex; align-items: center; gap: 8px; padding: 9px 14px;
+      border: 1px solid var(--line); border-radius: 999px; background: var(--soft); color: var(--muted); font-size: 12px;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+    }
+    .hero-copy > .chip {
+      display: inline-flex;
+      width: fit-content;
+      justify-self: start;
+      align-self: start;
+      padding: 0;
+      border-color: transparent;
+      background: transparent;
+      box-shadow: none;
+    }
+    .upload-grid, .result-top, .player-layout, .summary-grid, .triptych, .signal-column { display: grid; gap: 18px; }
+    .summary-card, .player-card, .note-card, .timeline-card, .brain-card {
+      border: 1px solid var(--line);
+      border-radius: 26px;
+      background: var(--panel);
+      padding: 22px;
+      box-shadow: var(--shadow-soft);
+    }
+    .big-number, .score-badge { display: block; margin-top: 8px; font-weight: 700; letter-spacing: -0.04em; }
+    .big-number { font-size: 38px; line-height: 0.9; }
+    .score-badge { font-size: 26px; line-height: 0.95; }
+    .muted { color: var(--muted); }
+    .card { padding: 28px; }
+    .top-strip { display: flex; justify-content: flex-end; margin-bottom: 16px; }
+    .upload-grid { grid-template-columns: 1fr 220px; align-items: end; }
+    .field-stack { display: grid; gap: 10px; }
+    .field-label { font-size: 13px; color: var(--muted); }
+    .native-file-input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+    .file-picker {
+      display: flex; align-items: center; gap: 12px; min-height: 58px; margin-top: 14px; padding: 10px 12px;
+      border-radius: 18px; border: 1px solid var(--line); background: var(--panel-2);
+    }
+    .file-picker-button {
+      flex: 0 0 auto; min-height: 40px; padding: 0 14px; border-radius: 14px; border: 1px solid var(--ink);
+      background: var(--ink); color: #ffffff; box-shadow: none;
+    }
+    .file-picker-text {
+      min-width: 0; color: var(--muted); font-size: 14px; line-height: 1.2;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    button, .button-link {
+      display: inline-flex; align-items: center; justify-content: center; min-height: 56px; padding: 0 22px; border: 1px solid var(--ink); border-radius: 18px; text-decoration: none; color: #ffffff; font-weight: 600; cursor: pointer;
+      background: var(--ink); box-shadow: none;
+    }
+    button:disabled, button.is-loading {
+      cursor: wait;
+      color: #ffffff;
+      background: #9a9a96;
+      border-color: #9a9a96;
+      box-shadow: none;
+      opacity: 1;
+    }
+    .button-link.secondary,
+    .brain-surface-toggle {
+      background: #ffffff;
+      color: var(--ink);
+      border-color: var(--line);
+      box-shadow: none;
+    }
+    .button-link.secondary.is-active { background: var(--ink); color: #ffffff; border-color: var(--ink); }
+    .button-row { display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+    .error {
+      color: var(--ink);
+      background: #f5f4f0;
+      border: 1px solid var(--ink);
+      padding: 18px;
+      border-radius: 22px;
+      white-space: pre-wrap;
+      line-height: 1.2;
+    }
+    .result-top { grid-template-columns: 1.2fr auto; align-items: start; }
+    .banner {
+      margin-top: 16px; padding: 20px 22px; border-radius: 24px; border: 1px solid var(--line);
+      background: var(--soft); line-height: 1.2; color: var(--ink);
+    }
+    .section { margin-top: 28px; padding-top: 28px; border-top: 1px solid var(--line-soft); }
+    .summary-grid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); margin-top: 16px; }
+    .metrics-row {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+      align-items: stretch;
+    }
+    .triptych { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); margin-top: 16px; }
+    .pill-row { display: flex; gap: 10px; flex-wrap: wrap; }
+    .pill {
+      display: inline-flex; align-items: center; gap: 6px; padding: 9px 13px; border-radius: 999px; border: 1px solid var(--line);
+      background: #ffffff; color: var(--muted); font-size: 13px;
+    }
+    .player-layout { grid-template-columns: 1.1fr 0.9fr; align-items: start; }
+    .single-analysis-layout.has-region-column {
+      grid-template-columns: minmax(320px, 1fr) minmax(430px, 1.22fr) minmax(320px, 1fr);
+      gap: 18px;
+      align-items: stretch;
+    }
+    .single-analysis-layout.has-region-column .signal-column {
+      gap: 14px;
+      height: 100%;
+      grid-template-rows: minmax(236px, auto) minmax(0, 1fr);
+    }
+    .brain-region-column {
+      display: grid;
+      align-self: stretch;
+      height: 100%;
+    }
+    .brain-region-column .brain-region-panel {
+      margin-top: 0;
+      min-height: 100%;
+      height: 100%;
+    }
+    video { width: 100%; border-radius: 20px; background: #111111; border: 1px solid var(--line); }
+    .timeline-card { background: #ffffff; }
+    .timeline-wrap {
+      position: relative;
+      margin-top: 14px;
+      overflow: hidden;
+      border-radius: 18px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background-color: var(--stage);
+      background-image:
+        linear-gradient(rgba(255, 255, 255, 0.055) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.055) 1px, transparent 1px);
+      background-size: 36px 36px;
+      background-position: center center;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.03),
+        0 14px 30px rgba(0, 0, 0, 0.12);
+    }
+    .timeline-svg { width: 100%; height: auto; display: block; position: relative; z-index: 1; }
+    .timeline-hover { position: absolute; inset: 0; cursor: crosshair; }
+    .timeline-cursor { position: absolute; top: 10px; bottom: 26px; width: 1px; background: rgba(255,255,255,0.32); opacity: 0; pointer-events: none; z-index: 2; }
+    .timeline-tooltip {
+      position: absolute; top: 12px; left: 0; min-width: 128px; padding: 10px 12px; border-radius: 14px; border: 1px solid var(--line); background: #ffffff;
+      opacity: 0; pointer-events: none; transform: translate(-50%, 0); box-shadow: var(--shadow-soft); z-index: 3;
+    }
+    .timeline-tooltip strong { display: block; font-size: 16px; }
+    .timeline-tooltip span { display: block; margin-top: 4px; color: var(--muted); font-size: 12px; }
+    .timeline-playhead { position: absolute; top: 10px; bottom: 26px; width: 2px; background: rgba(244, 239, 227, 0.92); opacity: 0.95; pointer-events: none; transform: translateX(-1px); z-index: 2; }
+    .timeline-axis { display: grid; grid-template-columns: repeat(5, 1fr); color: var(--muted); font-size: 12px; margin-top: 8px; }
+    .timeline-axis span { text-align: center; }
+    .timeline-axis span:first-child { text-align: left; }
+    .timeline-axis span:last-child { text-align: right; }
+    .timeline-scale-label {
+      fill: rgba(251, 247, 238, 0.76);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      paint-order: stroke;
+      stroke: rgba(46, 48, 42, 0.78);
+      stroke-width: 3px;
+      stroke-linejoin: round;
+    }
+    .compare-legend {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 14px;
+      align-items: stretch;
+    }
+    .compare-legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      min-width: 0;
+      min-height: 42px;
+      padding: 10px 14px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      color: var(--muted);
+      background: #ffffff;
+      font-size: 13px;
+      line-height: 1.1;
+    }
+    .compare-legend-text {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .compare-dot { width: 10px; height: 10px; border-radius: 999px; }
+    .compare-workspace { display: grid; grid-template-columns: 1fr; gap: 14px; align-items: start; margin-top: 18px; }
+    .compare-panel { border: 1px solid var(--line); border-radius: 24px; background: #ffffff; padding: 16px; min-width: 0; box-shadow: var(--shadow-soft); }
+    .compare-panel h3 { font-size: 16px; }
+    .compare-video-grid, .compare-brain-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 12px; }
+    .compare-variant-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; align-items: stretch; }
+    .compare-variant-column { min-width: 0; display: grid; grid-template-rows: auto auto; gap: 10px; }
+    .compare-video-tile, .compare-brain-tile { min-width: 0; border: 1px solid var(--line); border-radius: 22px; background: #ffffff; padding: 12px; box-shadow: var(--shadow-soft); }
+    .compare-tile-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; color: var(--muted); font-size: 12px; }
+    .compare-tile-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink); font-weight: 700; }
+    .compare-video-tile video { height: clamp(210px, 25vw, 310px); max-height: 310px; object-fit: contain; }
+    .compare-side { display: grid; gap: 12px; }
+    .compare-side .timeline-card { padding: 14px; }
+    .compare-side .timeline-wrap { margin-top: 10px; }
+    .compare-side .timeline-svg { max-height: 178px; }
+    .compare-side .compare-legend { gap: 6px; margin-top: 10px; }
+    .compare-side .compare-legend-item { min-height: 34px; padding: 6px 8px; border-radius: 12px; font-size: 11px; }
+    .compare-brain-tile .brain-stage { margin-top: 0; height: 150px; min-height: 150px; aspect-ratio: auto; border-radius: 14px; }
+    .compare-brain-tile .brain-region-panel { display: none !important; }
+    .compare-ranking { margin-top: 18px; }
+    .compare-card { border: 1px solid var(--line); border-radius: 26px; background: #ffffff; padding: 20px; min-width: 0; box-shadow: var(--shadow-soft); }
+    .compare-card h3 { margin-top: 12px; }
+    .compare-card video { margin-top: 12px; max-height: 360px; object-fit: contain; }
+    .compare-card .brain-stage { min-height: 220px; aspect-ratio: 1.1 / 0.68; }
+    .compare-card .brain-region-panel { max-height: 300px; overflow: auto; }
+    .brain-card { background: #ffffff; }
+    .brain-topbar { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; align-items: center; margin-top: 12px; }
+    .brain-legend { display: inline-flex; align-items: center; gap: 10px; color: var(--muted); font-size: 12px; }
+    .brain-legend-bar { width: 126px; height: 8px; border-radius: 999px; background: #cfcfc8; border: 1px solid #b9b8b1; }
+    .brain-surface-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .brain-surface-toggle {
+      min-height: 34px; padding: 0 12px; border: 1px solid var(--line); border-radius: 999px; background: #ffffff;
+      color: var(--muted); box-shadow: none; font-size: 12px; font-weight: 600;
+    }
+    .brain-surface-toggle.is-active {
+      color: #ffffff; border-color: var(--ink); background: var(--ink); box-shadow: none;
+    }
+    .brain-stage {
+      position: relative; margin-top: 14px; border-radius: 18px; border: 1px solid rgba(89, 105, 126, 0.4);
+      background-color: var(--stage);
+      background-image:
+        linear-gradient(rgba(255, 255, 255, 0.055) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.055) 1px, transparent 1px);
+      background-size: 36px 36px;
+      background-position: center center;
+      overflow: hidden; aspect-ratio: 1.08 / 0.98;
+      min-height: 320px;
+    }
+    .brain-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; cursor: grab; }
+    .brain-canvas:active { cursor: grabbing; }
+    .brain-region-panel {
+      display: none;
+      margin-top: 14px;
+      padding: 18px;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: #ffffff;
+      box-shadow: var(--shadow-soft);
+    }
+    .brain-region-panel.is-visible { display: block; }
+    .brain-region-grid {
+      display: grid;
+      gap: 10px;
+      margin-top: 14px;
+      grid-template-columns: 1fr;
+    }
+    .brain-region-card {
+      display: grid;
+      grid-template-columns: minmax(150px, 0.34fr) minmax(0, 1fr);
+      gap: 10px 16px;
+      align-items: start;
+      padding: 14px 16px;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: var(--soft);
+      overflow-wrap: normal;
+      word-break: keep-all;
+      hyphens: none;
+    }
+    .brain-region-head { display: grid; gap: 6px; }
+    .brain-region-name { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; letter-spacing: -0.02em; min-width: 0; }
+    .brain-region-name span:last-child { overflow-wrap: normal; word-break: keep-all; hyphens: none; }
+    .brain-region-swatch { width: 12px; height: 12px; border-radius: 999px; flex: 0 0 auto; box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12); }
+    .brain-region-level { font-size: 12px; color: var(--muted); white-space: nowrap; }
+    .brain-region-card p { margin: 0; color: var(--muted); line-height: 1.24; overflow-wrap: normal; word-break: keep-all; hyphens: none; }
+    .brain-region-meter {
+      grid-column: 1 / -1;
+      margin-top: 2px;
+      width: 100%;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--line-soft);
+      overflow: hidden;
+    }
+    .brain-region-meter span {
+      display: block;
+      height: 100%;
+      width: 100%;
+      border-radius: inherit;
+      background: var(--region-color);
+      transform-origin: left center;
+      transform: scaleX(var(--region-level, 0));
+      transition: transform 120ms linear, background-color 180ms ease;
+      will-change: transform;
+    }
+    .brain-region-empty {
+      margin-top: 14px;
+      padding: 14px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--muted);
+      line-height: 1.24;
+    }
+    .single-analysis-layout.has-region-column .player-card,
+    .single-analysis-layout.has-region-column .brain-region-panel,
+    .single-analysis-layout.has-region-column .timeline-card,
+    .single-analysis-layout.has-region-column .brain-card {
+      height: 100%;
+    }
+    .single-analysis-layout.has-region-column .player-card {
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      min-height: 100%;
+    }
+    .single-analysis-layout.has-region-column .player-card video {
+      height: 100%;
+      min-height: 620px;
+      max-height: none;
+      object-fit: contain;
+    }
+    .single-analysis-layout.has-region-column .timeline-card {
+      min-height: 236px;
+    }
+    .single-analysis-layout.has-region-column .brain-card {
+      display: grid;
+      grid-template-rows: auto auto auto minmax(0, 1fr);
+      min-height: 474px;
+    }
+    .single-analysis-layout.has-region-column .brain-stage {
+      height: 100%;
+      min-height: 318px;
+      aspect-ratio: auto;
+    }
+    .single-analysis-layout.has-region-column .brain-region-grid {
+      gap: 8px;
+      margin-top: 12px;
+      min-height: 100%;
+      align-content: stretch;
+      grid-auto-rows: minmax(0, 1fr);
+    }
+    .single-analysis-layout.has-region-column .brain-region-card {
+      grid-template-columns: minmax(138px, 0.34fr) minmax(0, 1fr);
+      gap: 8px 14px;
+      padding: 12px 14px;
+      min-height: 0;
+    }
+    .single-analysis-layout.has-region-column .brain-region-panel > .muted {
+      line-height: 1.22 !important;
+    }
+    .single-analysis-layout.has-region-column .brain-region-card p {
+      line-height: 1.48;
+      font-size: 13px;
+    }
+    .single-analysis-layout.has-region-column .brain-region-meter {
+      height: 7px;
+    }
+    .submit-progress {
+      display: none;
+      margin-top: 18px;
+      padding: 16px;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: var(--panel-2);
+      overflow: hidden;
+    }
+    .submit-progress.is-visible { display: block; }
+    .submit-progress-head { display: flex; justify-content: space-between; gap: 12px; color: var(--muted); font-size: 13px; margin-bottom: 12px; }
+    .submit-progress-track {
+      position: relative;
+      height: 12px;
+      border-radius: 999px;
+      background: var(--line-soft);
+      overflow: hidden;
+    }
+    .submit-progress-line {
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 42%;
+      border-radius: inherit;
+      background: linear-gradient(
+        90deg,
+        rgba(23, 23, 21, 0) 0%,
+        rgba(23, 23, 21, 0.18) 26%,
+        rgba(23, 23, 21, 0.55) 58%,
+        rgba(23, 23, 21, 0.96) 100%
+      );
+      animation: progressSlide 1.25s ease-in-out infinite;
+    }
+    @keyframes progressSlide {
+      0% { transform: translateX(-105%); }
+      52% { transform: translateX(95%); }
+      100% { transform: translateX(250%); }
+    }
+    .code-block {
+      margin-top: 12px; padding: 16px; border-radius: 18px; background: var(--panel-2); border: 1px solid var(--line); white-space: pre-wrap; line-height: 1.2; font-family: Consolas, "Courier New", monospace; font-size: 13px;
+    }
+    .list { margin: 12px 0 0; padding-left: 18px; line-height: 1.35; color: var(--muted); }
+    .footer-note { margin-top: 18px; color: var(--muted); font-size: 13px; line-height: 1.35; }
+    details.fold { margin-top: 16px; }
+    details.fold summary {
+      cursor: pointer;
+      color: var(--ink);
+      font-weight: 700;
+      list-style: none;
+    }
+    details.fold summary::-webkit-details-marker { display: none; }
+    details.fold summary::before {
+      content: "▸";
+      display: inline-block;
+      margin-right: 8px;
+      color: var(--muted);
+      transition: transform 0.18s ease;
+    }
+    details.fold[open] summary::before { transform: rotate(90deg); }
+    .editorial-hero {
+      margin-top: 18px;
+      padding: 22px;
+      border-radius: 28px;
+      border: 1px solid var(--line);
+      background: var(--soft);
+    }
+    .editorial-hero p { margin-top: 12px; line-height: 1.2; color: var(--muted); }
+    @media (max-width: 1260px) {
+      .single-analysis-layout.has-region-column {
+        grid-template-columns: 1fr 1fr;
+      }
+      .single-analysis-layout.has-region-column .brain-region-column {
+        grid-column: 1 / -1;
+      }
+    }
+    @media (max-width: 980px) {
+      .upload-grid, .player-layout, .result-top, .compare-grid, .compare-workspace { grid-template-columns: 1fr; }
+      .compare-video-grid, .compare-brain-grid, .compare-variant-grid { grid-template-columns: 1fr; }
+      .button-row { justify-content: flex-start; }
+      .brain-region-card { grid-template-columns: 1fr; }
+    }
+    :root {
+      --bg: #171916;
+      --bg-2: #23241f;
+      --card: #f7f3eb;
+      --panel: #fbf8f1;
+      --panel-2: #f2eee4;
+      --ink: #171715;
+      --muted: #666459;
+      --muted-2: #8a867a;
+      --line: rgba(23, 23, 21, 0.12);
+      --line-strong: rgba(23, 23, 21, 0.18);
+      --line-soft: rgba(23, 23, 21, 0.08);
+      --soft: #f2ede2;
+      --soft-2: #ebe5d8;
+      --shadow: 0 28px 80px rgba(0, 0, 0, 0.18);
+      --shadow-soft: 0 16px 34px rgba(19, 19, 16, 0.08);
+      --stage: #2e302a;
+      --chart-bg: #f0ece1;
+      --chart-grid: rgba(23, 23, 21, 0.12);
+      --chart-grid-soft: rgba(23, 23, 21, 0.08);
+    }
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 28px;
+    }
+    ::selection {
+      background: rgba(24, 26, 21, 0.14);
+      color: var(--ink);
+    }
+    body {
+      color: var(--ink);
+      line-height: 1.42;
+      background-color: var(--bg);
+      background-image:
+        radial-gradient(circle at top center, rgba(255, 255, 255, 0.05), transparent 42%),
+        linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+      background-size: auto, 36px 36px, 36px 36px;
+      background-position: center top, 0 0, 0 0;
+    }
+    body, p, li, span, label, button, a {
+      word-break: normal;
+      overflow-wrap: break-word;
+      hyphens: none;
+    }
+    h1, h2, h3 {
+      text-wrap: balance;
+    }
+    p, li, .lead, .muted {
+      text-wrap: pretty;
+    }
+    .wrap {
+      width: min(1760px, calc(100% - 48px));
+      margin: 20px auto 80px;
+    }
+    .hero,
+    .card {
+      position: relative;
+      overflow: clip;
+      border-color: rgba(255, 255, 255, 0.08);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.48), rgba(255, 255, 255, 0) 22%),
+        linear-gradient(180deg, #fcfaf5, #f5f0e6);
+      box-shadow: var(--shadow);
+    }
+    .hero::after,
+    .card::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.2), transparent 22%);
+      opacity: 0.7;
+    }
+    .hero {
+      padding: 34px 36px;
+      border-radius: 38px;
+    }
+    .card {
+      padding: 30px;
+      border-radius: 32px;
+    }
+    .stack {
+      gap: 22px;
+      margin-top: 16px;
+    }
+    h1 {
+      max-width: 980px;
+      font-size: clamp(40px, 5.1vw, 80px);
+      line-height: 0.98;
+      font-weight: 800;
+    }
+    h2 {
+      font-size: clamp(29px, 2.25vw, 42px);
+      line-height: 0.96;
+    }
+    h3 {
+      line-height: 1.02;
+    }
+    .lead {
+      margin-top: 18px;
+      max-width: 920px;
+      color: var(--muted);
+      line-height: 1.36;
+      font-size: 17px;
+    }
+    .chip,
+    .pill {
+      backdrop-filter: blur(10px);
+    }
+    .chip {
+      padding: 8px 14px;
+      border-color: rgba(23, 23, 21, 0.1);
+      background: rgba(255, 255, 255, 0.6);
+      color: var(--muted);
+    }
+    .hero-copy > .chip {
+      width: fit-content;
+      padding: 10px 18px;
+      border: 0;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.06);
+      box-shadow: none;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+    }
+    .pill {
+      min-height: 38px;
+      padding: 8px 13px;
+      border-color: rgba(23, 23, 21, 0.1);
+      background: rgba(255, 255, 255, 0.64);
+      color: var(--muted);
+    }
+    .pill-row {
+      gap: 8px;
+    }
+    .nav-pill {
+      text-decoration: none;
+      transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+    }
+    .nav-pill:hover {
+      transform: translateY(-1px);
+      border-color: rgba(23, 23, 21, 0.22);
+      background: rgba(255, 255, 255, 0.88);
+    }
+    .top-strip {
+      position: relative;
+      width: 100%;
+      display: flex;
+      justify-content: flex-end;
+      z-index: 1;
+      margin-bottom: 14px;
+      pointer-events: auto;
+    }
+    .top-controls {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(18, 19, 17, 0.88);
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      box-shadow: 0 18px 48px rgba(0, 0, 0, 0.18);
+      isolation: isolate;
+      pointer-events: auto;
+    }
+    .top-controls .button-link.secondary {
+      min-height: 40px;
+      padding: 0 18px;
+      border-radius: 999px;
+    }
+    .theme-switch {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .theme-switch-label {
+      color: rgba(255, 255, 255, 0.68);
+      font-size: 12px;
+      letter-spacing: -0.02em;
+      white-space: nowrap;
+    }
+    .theme-toggle {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      width: 54px;
+      min-height: 32px;
+      height: 32px;
+      padding: 4px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      background: rgba(255, 255, 255, 0.12);
+      box-shadow: none;
+    }
+    .theme-toggle:hover {
+      transform: none;
+      box-shadow: none;
+      background: rgba(255, 255, 255, 0.16);
+    }
+    .theme-toggle-knob {
+      width: 22px;
+      height: 22px;
+      border-radius: 999px;
+      background: #ffffff;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.26);
+      transform: translateX(0);
+      transition: transform 0.22s ease, background 0.22s ease;
+    }
+    body.theme-dark .theme-toggle {
+      background: rgba(255, 255, 255, 0.2);
+    }
+    body.theme-dark .theme-toggle-knob {
+      background: #f5f1e8;
+      transform: translateX(22px);
+    }
+    .hero-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.38fr) minmax(320px, 0.78fr);
+      gap: 22px;
+      align-items: stretch;
+    }
+    .hero-copy {
+      display: grid;
+      align-content: end;
+    }
+    .hero-aside {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      align-self: stretch;
+    }
+    .hero-panel {
+      position: relative;
+      display: grid;
+      align-content: start;
+      gap: 12px;
+      min-height: 176px;
+      padding: 18px;
+      border-radius: 26px;
+      border: 1px solid rgba(23, 23, 21, 0.1);
+      background: rgba(255, 255, 255, 0.6);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    }
+    .hero-kicker {
+      width: fit-content;
+      background: rgba(246, 243, 235, 0.92);
+    }
+    .hero-panel strong {
+      font-size: 16px;
+      line-height: 1.15;
+      letter-spacing: -0.03em;
+    }
+    .hero-panel p {
+      color: var(--muted);
+      line-height: 1.42;
+      font-size: 13px;
+    }
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: start;
+    }
+    .upload-lead {
+      margin-top: 8px;
+      line-height: 1.38 !important;
+      max-width: 900px;
+    }
+    .meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+    .upload-card {
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.44), rgba(255, 255, 255, 0) 24%),
+        linear-gradient(180deg, #f9f6ef, #f3eee2);
+    }
+    .upload-grid {
+      grid-template-columns: minmax(0, 1fr) minmax(220px, 246px);
+      grid-template-areas:
+        "picker actions"
+        ". note";
+      gap: 14px 18px;
+      align-items: end;
+      margin-top: 20px;
+    }
+    .upload-field-col {
+      grid-area: picker;
+      min-width: 0;
+    }
+    .file-picker {
+      min-height: 68px;
+      padding: 12px 14px;
+      border-radius: 22px;
+      border: 1px dashed rgba(23, 23, 21, 0.22);
+      background: rgba(255, 255, 255, 0.56);
+    }
+    .file-picker-button {
+      min-height: 42px;
+      padding: 0 15px;
+      border-radius: 16px;
+      box-shadow: 0 10px 22px rgba(23, 23, 21, 0.12);
+    }
+    .file-picker-text {
+      line-height: 1.4;
+    }
+    .upload-actions {
+      grid-area: actions;
+      display: grid;
+      align-self: end;
+      min-width: 0;
+    }
+    .upload-actions > button {
+      width: 100%;
+    }
+    .action-note {
+      grid-area: note;
+      justify-self: end;
+      max-width: 246px;
+      margin: -4px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.42;
+      text-align: right;
+    }
+    button,
+    .button-link {
+      min-height: 56px;
+      border-radius: 18px;
+      transition:
+        transform 0.18s ease,
+        box-shadow 0.22s ease,
+        background 0.22s ease,
+        border-color 0.22s ease,
+        color 0.22s ease;
+    }
+    button:hover,
+    .button-link:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 16px 34px rgba(23, 23, 21, 0.12);
+    }
+    button:active,
+    .button-link:active {
+      transform: translateY(0);
+    }
+    .button-link.secondary,
+    .brain-surface-toggle {
+      background: rgba(255, 255, 255, 0.74);
+      color: var(--ink);
+      border-color: rgba(23, 23, 21, 0.12);
+    }
+    .button-link.secondary:hover,
+    .brain-surface-toggle:hover {
+      background: rgba(255, 255, 255, 0.96);
+    }
+    button.theme-toggle {
+      flex: 0 0 54px;
+      width: 54px;
+      min-width: 54px;
+      max-width: 54px;
+      min-height: 32px;
+      height: 32px;
+      padding: 4px;
+      border-radius: 999px;
+      justify-content: flex-start;
+      line-height: 1;
+      appearance: none;
+      box-shadow: none;
+    }
+    button.theme-toggle:hover,
+    button.theme-toggle:active {
+      transform: none;
+      box-shadow: none;
+    }
+    .result-top {
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 18px;
+      align-items: start;
+    }
+    .result-actions {
+      align-self: start;
+      justify-content: flex-end;
+    }
+    .result-pills {
+      gap: 8px;
+      align-items: center;
+    }
+    .banner {
+      padding: 18px 20px;
+      border-radius: 24px;
+      border-color: rgba(23, 23, 21, 0.12);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.78), rgba(243, 239, 228, 0.9));
+      line-height: 1.42;
+      color: var(--ink);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    }
+    .quick-nav {
+      margin-top: 14px;
+      align-items: center;
+    }
+    .section {
+      margin-top: 24px;
+      padding-top: 24px;
+      border-top-color: rgba(23, 23, 21, 0.08);
+    }
+    .workspace-shell {
+      margin-top: 14px;
+    }
+    .workspace-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+    .workspace-meta p {
+      margin: 0;
+      max-width: 940px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+    .workspace-panel {
+      position: relative;
+      min-width: 0;
+    }
+    .workspace-stack {
+      padding: 10px;
+      border-radius: 30px;
+      border: 1px solid rgba(23, 23, 21, 0.08);
+      background: rgba(255, 255, 255, 0.2);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    }
+    .workspace-panel[draggable="true"] {
+      cursor: grab;
+    }
+    .workspace-panel[draggable="true"]::before {
+      content: "";
+      position: absolute;
+      top: 10px;
+      right: 16px;
+      width: 34px;
+      height: 6px;
+      border-radius: 999px;
+      background:
+        linear-gradient(90deg, rgba(23, 23, 21, 0.24), rgba(23, 23, 21, 0.08));
+      opacity: 0.55;
+      z-index: 2;
+      pointer-events: none;
+    }
+    .workspace-panel.dragging {
+      opacity: 0.48;
+      cursor: grabbing;
+      transform: scale(0.988);
+    }
+    .workspace-panel.drop-target::after {
+      content: "";
+      position: absolute;
+      inset: -6px;
+      border-radius: 30px;
+      border: 1px dashed rgba(23, 23, 21, 0.38);
+      pointer-events: none;
+    }
+    .summary-card,
+    .player-card,
+    .note-card,
+    .timeline-card,
+    .brain-card,
+    .compare-panel,
+    .compare-video-tile,
+    .compare-brain-tile,
+    .editorial-hero,
+    .brain-region-panel,
+    details.fold {
+      border-color: rgba(23, 23, 21, 0.1);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.78), rgba(245, 241, 233, 0.96));
+      box-shadow: var(--shadow-soft);
+    }
+    .summary-card,
+    .note-card,
+    .compare-panel,
+    .compare-video-tile,
+    .compare-brain-tile,
+    .timeline-card,
+    .brain-card,
+    .brain-region-panel,
+    .player-card {
+      transition: transform 0.18s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+    }
+    .summary-card:hover,
+    .note-card:hover,
+    .compare-panel:hover,
+    .compare-video-tile:hover,
+    .compare-brain-tile:hover,
+    .timeline-card:hover,
+    .brain-card:hover,
+    .brain-region-panel:hover,
+    .player-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(23, 23, 21, 0.16);
+      box-shadow: 0 18px 42px rgba(19, 19, 16, 0.11);
+    }
+    .summary-grid,
+    .triptych {
+      gap: 14px;
+    }
+    .player-layout {
+      gap: 16px;
+    }
+    .single-analysis-layout.has-region-column {
+      grid-template-columns: minmax(320px, 1fr) minmax(430px, 1.22fr) minmax(320px, 1fr);
+      gap: 18px;
+      align-items: stretch;
+    }
+    .signal-column {
+      gap: 16px;
+    }
+    .single-analysis-layout.has-region-column .brain-region-column {
+      display: grid;
+    }
+    .single-analysis-layout.has-region-column .brain-region-column .brain-region-panel {
+      display: grid;
+      grid-template-rows: auto auto minmax(0, 1fr);
+      position: sticky;
+      top: 88px;
+      max-height: calc(100vh - 112px);
+      overflow: auto;
+    }
+    video {
+      border-radius: 22px;
+      border-color: rgba(23, 23, 21, 0.12);
+      box-shadow: 0 18px 40px rgba(18, 18, 15, 0.08);
+    }
+    .timeline-card {
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.85), rgba(246, 242, 233, 0.96));
+    }
+    .timeline-card .timeline-svg rect:first-child {
+      fill: transparent;
+    }
+    .timeline-card .timeline-svg line:first-of-type,
+    .timeline-card .timeline-svg line:nth-of-type(2) {
+      stroke: rgba(245, 241, 232, 0.18);
+    }
+    .timeline-card .timeline-svg line:nth-of-type(3) {
+      stroke: rgba(245, 241, 232, 0.12);
+    }
+    .timeline-wrap {
+      margin-top: 16px;
+    }
+    .timeline-tooltip {
+      border-radius: 16px;
+      border-color: rgba(23, 23, 21, 0.12);
+      background: rgba(251, 249, 243, 0.96);
+      backdrop-filter: blur(12px);
+    }
+    .compare-legend {
+      gap: 8px;
+    }
+    .compare-legend-item {
+      background: rgba(255, 255, 255, 0.7);
+    }
+    .compare-workspace {
+      gap: 16px;
+    }
+    .compare-variant-grid {
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 14px;
+    }
+    .compare-video-tile,
+    .compare-brain-tile {
+      padding: 14px;
+      border-radius: 24px;
+    }
+    .compare-video-tile video {
+      height: clamp(220px, 22vw, 318px);
+      max-height: 318px;
+    }
+    .compare-brain-tile .brain-stage {
+      min-height: 168px;
+      height: 168px;
+      border-radius: 16px;
+    }
+    .brain-topbar {
+      gap: 12px;
+    }
+    .brain-legend {
+      gap: 8px;
+    }
+    .brain-legend-bar {
+      border-color: rgba(255, 255, 255, 0.16);
+    }
+    .brain-stage {
+      min-height: 312px;
+      border-radius: 22px;
+      border-color: rgba(255, 255, 255, 0.08);
+      background-color: var(--stage);
+      background-image:
+        linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+        radial-gradient(circle at top, rgba(255, 255, 255, 0.06), transparent 30%);
+      background-size: 36px 36px, 36px 36px, auto;
+      background-position: center center, center center, center top;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.03),
+        0 18px 40px rgba(0, 0, 0, 0.22);
+    }
+    .brain-region-panel {
+      border-radius: 24px;
+      padding: 20px;
+    }
+    .brain-region-grid {
+      gap: 10px;
+    }
+    .brain-region-card {
+      border-radius: 18px;
+      border-color: rgba(23, 23, 21, 0.08);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.8), rgba(241, 237, 228, 0.94));
+    }
+    .brain-region-card p {
+      line-height: 1.44 !important;
+    }
+    .brain-region-meter {
+      height: 6px;
+      background: rgba(23, 23, 21, 0.08);
+    }
+    .submit-progress {
+      margin-top: 20px;
+      border-radius: 22px;
+      border-color: rgba(23, 23, 21, 0.1);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(242, 238, 227, 0.96));
+    }
+    .submit-progress-head {
+      font-size: 12px;
+    }
+    .submit-progress-track {
+      height: 10px;
+      background: rgba(23, 23, 21, 0.08);
+    }
+    .submit-progress-line {
+      width: 36%;
+      background: linear-gradient(90deg, #171916, #5e6553, #d9d3c7);
+      animation-duration: 1.45s;
+    }
+    details.fold {
+      margin-top: 18px;
+      padding: 8px 18px 18px;
+      border-radius: 24px;
+    }
+    details.fold summary {
+      display: flex;
+      align-items: center;
+      min-height: 44px;
+    }
+    .editorial-hero {
+      padding: 24px;
+      border-radius: 28px;
+    }
+    .editorial-hero p {
+      line-height: 1.42;
+    }
+    .footer-note {
+      line-height: 1.42;
+    }
+    .sources-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-top: 20px;
+      padding: 16px 18px;
+      border-radius: 24px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.76), rgba(243, 239, 228, 0.96));
+      box-shadow: var(--shadow-soft);
+    }
+    .sources-footer-copy {
+      min-width: 0;
+    }
+    .sources-footer-copy h3 {
+      font-size: 16px;
+    }
+    .sources-footer-copy p {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.42;
+    }
+    .sources-footer-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+    .sources-footer .button-link {
+      min-height: 42px;
+      padding: 0 16px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+    .sources-footer-note {
+      margin-top: 10px;
+      max-width: 860px;
+      font-size: 12px;
+      line-height: 1.36;
+      color: var(--muted);
+      opacity: 0.88;
+    }
+    .error {
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.78), rgba(243, 239, 228, 0.94));
+      border-color: rgba(23, 23, 21, 0.18);
+      box-shadow: var(--shadow-soft);
+    }
+    body.theme-dark {
+      --card: #161815;
+      --panel: #171916;
+      --panel-2: #1c1f1b;
+      --ink: #f3eee2;
+      --muted: #b9b3a4;
+      --muted-2: #8f8a7d;
+      --line: rgba(255, 255, 255, 0.1);
+      --line-strong: rgba(255, 255, 255, 0.16);
+      --line-soft: rgba(255, 255, 255, 0.08);
+      --soft: #191b18;
+      --soft-2: #20231f;
+      --shadow: 0 28px 80px rgba(0, 0, 0, 0.3);
+      --shadow-soft: 0 16px 34px rgba(0, 0, 0, 0.22);
+      --chart-bg: #2e302a;
+    }
+    body.theme-dark .hero,
+    body.theme-dark .card {
+      border-color: rgba(255, 255, 255, 0.08);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0) 22%),
+        linear-gradient(180deg, #161815, #1a1d19);
+    }
+    body.theme-dark .hero::after,
+    body.theme-dark .card::after {
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 22%);
+      opacity: 0.9;
+    }
+    body.theme-dark .chip,
+    body.theme-dark .pill {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.12);
+      color: var(--muted);
+    }
+    body.theme-dark .nav-pill:hover {
+      border-color: rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.09);
+    }
+    body.theme-dark .hero-panel,
+    body.theme-dark .summary-card,
+    body.theme-dark .player-card,
+    body.theme-dark .note-card,
+    body.theme-dark .timeline-card,
+    body.theme-dark .brain-card,
+    body.theme-dark .compare-panel,
+    body.theme-dark .compare-video-tile,
+    body.theme-dark .compare-brain-tile,
+    body.theme-dark .editorial-hero,
+    body.theme-dark .brain-region-panel,
+    body.theme-dark details.fold {
+      border-color: rgba(255, 255, 255, 0.08);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(23, 25, 22, 0.96));
+      box-shadow: 0 18px 44px rgba(0, 0, 0, 0.24);
+    }
+    body.theme-dark .workspace-stack {
+      border-color: rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.03);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    }
+    body.theme-dark .file-picker {
+      background: rgba(255, 255, 255, 0.04);
+      border-color: rgba(255, 255, 255, 0.16);
+    }
+    body.theme-dark button,
+    body.theme-dark .button-link:not(.secondary) {
+      background: #f3eee2;
+      color: #161815;
+      border-color: #f3eee2;
+    }
+    body.theme-dark button.theme-toggle {
+      background: rgba(255, 255, 255, 0.2);
+      color: inherit;
+      border-color: rgba(255, 255, 255, 0.14);
+    }
+    body.theme-dark button:disabled,
+    body.theme-dark button.is-loading {
+      background: #666258;
+      border-color: #666258;
+      color: #f3eee2;
+    }
+    body.theme-dark .button-link.secondary,
+    body.theme-dark .brain-surface-toggle {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--ink);
+      border-color: rgba(255, 255, 255, 0.12);
+    }
+    body.theme-dark .button-link.secondary.is-active,
+    body.theme-dark .brain-surface-toggle.is-active {
+      background: #f3eee2;
+      color: #161815;
+      border-color: #f3eee2;
+    }
+    body.theme-dark .banner {
+      border-color: rgba(255, 255, 255, 0.08);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(25, 27, 24, 0.92));
+      color: var(--ink);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    }
+    body.theme-dark .timeline-tooltip {
+      background: rgba(22, 24, 21, 0.96);
+      border-color: rgba(255, 255, 255, 0.12);
+      color: var(--ink);
+    }
+    body.theme-dark .compare-legend-item {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.12);
+      color: var(--muted);
+    }
+    body.theme-dark .brain-region-card {
+      border-color: rgba(255, 255, 255, 0.08);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(28, 31, 27, 0.94));
+    }
+    body.theme-dark .brain-region-meter {
+      background: rgba(255, 255, 255, 0.08);
+    }
+    body.theme-dark .brain-legend-bar {
+      background: rgba(255, 255, 255, 0.16);
+      border-color: rgba(255, 255, 255, 0.12);
+    }
+    body.theme-dark video {
+      border-color: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.22);
+    }
+    body.theme-dark .submit-progress {
+      border-color: rgba(255, 255, 255, 0.08);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(29, 32, 28, 0.95));
+    }
+    body.theme-dark .submit-progress-track {
+      background: rgba(255, 255, 255, 0.08);
+    }
+    body.theme-dark .submit-progress-line {
+      background: linear-gradient(
+        90deg,
+        rgba(90, 100, 82, 0) 0%,
+        rgba(90, 100, 82, 0.24) 28%,
+        rgba(133, 144, 118, 0.6) 62%,
+        rgba(243, 238, 226, 0.96) 100%
+      );
+    }
+    body.theme-dark .error {
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(30, 19, 19, 0.96));
+      border-color: rgba(255, 120, 120, 0.28);
+      color: var(--ink);
+    }
+    body.theme-dark .sources-footer {
+      border-color: rgba(255, 255, 255, 0.08);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(24, 26, 23, 0.96));
+      box-shadow: 0 18px 44px rgba(0, 0, 0, 0.24);
+    }
+    @media (prefers-reduced-motion: no-preference) {
+      .hero,
+      .stack > .card,
+      .stack > .error {
+        animation: fadeLift 0.56s cubic-bezier(0.22, 1, 0.36, 1) both;
+      }
+      .summary-card,
+      .note-card,
+      .compare-video-tile,
+      .compare-brain-tile,
+      .brain-region-card {
+        animation: fadeLift 0.44s cubic-bezier(0.22, 1, 0.36, 1) both;
+      }
+    }
+    @keyframes fadeLift {
+      from {
+        opacity: 0;
+        transform: translateY(14px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    @media (max-width: 1480px) {
+      .hero-grid {
+        grid-template-columns: 1fr;
+      }
+      .hero-aside {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+    @media (max-width: 1320px) {
+      .single-analysis-layout.has-region-column {
+        grid-template-columns: 1fr 1fr;
+      }
+      .single-analysis-layout.has-region-column .brain-region-column {
+        grid-column: 1 / -1;
+      }
+      .single-analysis-layout.has-region-column .brain-region-column .brain-region-panel {
+        position: static;
+        max-height: none;
+      }
+    }
+    @media (max-width: 1100px) {
+      .upload-grid,
+      .result-top,
+      .workspace-meta {
+        grid-template-columns: 1fr;
+      }
+      .section-head,
+      .workspace-meta {
+        display: grid;
+        justify-content: stretch;
+      }
+      .meta-row {
+        justify-content: flex-start;
+      }
+      .result-actions {
+        justify-items: start;
+      }
+      .upload-actions {
+        min-width: 0;
+      }
+      .upload-grid {
+        grid-template-areas:
+          "picker"
+          "actions"
+          "note";
+        gap: 12px;
+      }
+      .action-note {
+        justify-self: start;
+        max-width: none;
+        margin-top: 0;
+        text-align: left;
+      }
+      .hero-aside {
+        grid-template-columns: 1fr;
+      }
+      .sources-footer {
+        display: grid;
+        justify-content: stretch;
+      }
+      .sources-footer-actions {
+        justify-content: flex-start;
+      }
+      .metrics-row {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+    @media (max-width: 980px) {
+      .wrap {
+        width: calc(100% - 24px);
+        margin: 16px 12px 64px;
+      }
+      .hero,
+      .card {
+        padding: 22px;
+        border-radius: 28px;
+      }
+      .upload-grid,
+      .player-layout,
+      .result-top,
+      .compare-workspace,
+      .compare-variant-grid,
+      .single-analysis-layout.has-region-column {
+        grid-template-columns: 1fr !important;
+      }
+      .button-row {
+        justify-content: flex-start;
+      }
+      .brain-region-card {
+        grid-template-columns: 1fr;
+      }
+      .workspace-panel[draggable="true"]::before {
+        display: none;
+      }
+    }
+    @media (max-width: 760px) {
+      .top-strip {
+        width: 100%;
+      }
+      .top-controls {
+        width: 100%;
+        justify-content: space-between;
+      }
+      .theme-switch-label {
+        display: none;
+      }
+      .metrics-row {
+        grid-template-columns: 1fr;
+      }
+    }
+    @page {
+      {% if pdf_mode and result and result.mode == "compare" %}
+      size: A4 landscape;
+      margin: 6mm;
+      {% else %}
+      size: A4;
+      margin: 10mm;
+      {% endif %}
+    }
+    body.pdf-mode {
+      background: #ffffff;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .pdf-mode *,
+    .pdf-mode *::before,
+    .pdf-mode *::after {
+      animation: none !important;
+      transition: none !important;
+    }
+    .pdf-mode .wrap { width: 100%; max-width: none; margin: 0; }
+    .pdf-mode .top-strip,
+    .pdf-mode .hero,
+    .pdf-mode form.card,
+    .pdf-mode .button-row,
+    .pdf-mode .player-card,
+    .pdf-mode .brain-card,
+    .pdf-mode .brain-region-column,
+    .pdf-mode .compare-variant-grid {
+      display: none !important;
+    }
+    .pdf-mode .card {
+      box-shadow: none;
+      border-radius: 22px;
+      background: #ffffff;
+    }
+    .pdf-mode .player-layout { grid-template-columns: 1fr; }
+    .pdf-mode .signal-column { display: block; }
+    .pdf-mode .quick-nav,
+    .pdf-mode .workspace-meta {
+      display: none !important;
+    }
+    .pdf-mode .timeline-card,
+    .pdf-mode .summary-card,
+    .pdf-mode .note-card,
+    .pdf-mode .editorial-hero,
+    .pdf-mode .banner {
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+    .pdf-mode .section {
+      break-inside: auto;
+      page-break-inside: auto;
+    }
+    .pdf-mode details.fold > summary { display: none; }
+    .pdf-mode .timeline-hover,
+    .pdf-mode .timeline-cursor,
+    .pdf-mode .timeline-playhead,
+    .pdf-mode .timeline-tooltip {
+      display: none !important;
+    }
+    .pdf-mode .stack > .card,
+    .pdf-mode .stack > .error,
+    .pdf-mode .summary-card,
+    .pdf-mode .note-card,
+    .pdf-mode .compare-video-tile,
+    .pdf-mode .compare-brain-tile,
+    .pdf-mode .brain-region-card,
+    .pdf-mode .banner,
+    .pdf-mode .editorial-hero {
+      opacity: 1 !important;
+      transform: none !important;
+    }
+    .pdf-mode.compare-report .stack {
+      gap: 12px;
+      margin-top: 0;
+    }
+    .pdf-mode.compare-report .card {
+      padding: 16px;
+      border-radius: 18px;
+    }
+    .pdf-mode.compare-report .section {
+      margin-top: 16px;
+      padding-top: 16px;
+    }
+    .pdf-mode.compare-report .result-top {
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+    .pdf-mode.compare-report h2 {
+      font-size: 24px;
+    }
+    .pdf-mode.compare-report h3 {
+      font-size: 16px;
+    }
+    .pdf-mode.compare-report .lead,
+    .pdf-mode.compare-report .muted,
+    .pdf-mode.compare-report p,
+    .pdf-mode.compare-report li {
+      font-size: 12px;
+      line-height: 1.28;
+    }
+    .pdf-mode.compare-report .pill,
+    .pdf-mode.compare-report .chip {
+      padding: 6px 10px;
+      font-size: 10px;
+    }
+    .pdf-mode.compare-report .banner {
+      margin-top: 10px;
+      padding: 12px 14px;
+      border-radius: 16px;
+    }
+    .pdf-mode.compare-report .timeline-card {
+      padding: 14px;
+    }
+    .pdf-mode.compare-report .timeline-wrap {
+      margin-top: 10px;
+    }
+    .pdf-mode.compare-report .timeline-axis {
+      margin-top: 6px;
+      font-size: 10px;
+    }
+    .pdf-mode.compare-report .compare-legend {
+      gap: 6px;
+      margin-top: 10px;
+    }
+    .pdf-mode.compare-report .compare-legend-item {
+      min-height: 28px;
+      padding: 5px 8px;
+      border-radius: 12px;
+      font-size: 9px;
+    }
+    .pdf-mode.compare-report .compare-dot {
+      width: 8px;
+      height: 8px;
+    }
+    .pdf-mode.compare-report .summary-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .pdf-mode.compare-report .summary-card {
+      padding: 12px;
+      border-radius: 16px;
+    }
+    .pdf-mode.compare-report .big-number {
+      margin-top: 6px;
+      font-size: 28px;
+    }
+  </style>
+</head>
+<body class="{% if pdf_mode %}pdf-mode theme-light{% if result and result.mode == 'compare' %} compare-report{% else %} single-report{% endif %}{% endif %}">
+  {% if not pdf_mode %}
+  <script>
+    (() => {
+      const savedTheme = document.documentElement.getAttribute("data-tribe-theme");
+      document.body.classList.add(savedTheme === "light" ? "theme-light" : "theme-dark");
+    })();
+  </script>
+  {% endif %}
+  <div class="wrap">
+    {% if not pdf_mode %}
+    <div class="top-strip">
+      <div class="top-controls">
+        <a class="button-link secondary" href="https://x.com/youraipulse" target="_blank" rel="noopener">AI Pulse</a>
+        <a class="button-link secondary" href="https://x.com/AmirMushich" target="_blank" rel="noopener">Amir Mushich</a>
+        <div class="theme-switch">
+          <span class="theme-switch-label">Theme</span>
+          <button type="button" class="theme-toggle" data-theme-toggle aria-label="Toggle dark theme" aria-pressed="true">
+            <span class="theme-toggle-knob"></span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero">
+      <div class="hero-grid">
+        <div class="hero-copy">
+          <p class="chip">Official TRIBE v2 workflow</p>
+          <h1>Predict virality with Meta TRIBE v2</h1>
+          <p class="lead">This ads analyze any video and shows its "viral potential" by modelling the viewer's brain activity heatmap while watching the video.</p>
+        </div>
+        <div class="hero-aside">
+          <div class="hero-panel">
+            <span class="chip hero-kicker">{{ "Read the curve" if language == "en" else "Смотри на кривую" }}</span>
+            <strong>{{ "See where attention grows, holds, and falls off." if language == "en" else "Сразу видно, где ролик набирает, держит и теряет сигнал." }}</strong>
+            <p>{{ "The timeline is the main control surface: hover, compare dips, and inspect nearby shots." if language == "en" else "График — главный ориентир: смотри на провалы, сравнивай их с сильными участками и проверяй соседние кадры." }}</p>
+          </div>
+          <div class="hero-panel">
+            <span class="chip hero-kicker">{{ "Understand the frame" if language == "en" else "Понимай кадр" }}</span>
+            <strong>{{ "The brain map turns the model into a visual explanation." if language == "en" else "Карта мозга показывает, что именно сейчас считывает модель." }}</strong>
+            <p>{{ "Large zones stay visible, while the moving bars show which systems matter more in the current moment." if language == "en" else "Все крупные зоны остаются на экране, а полоски ниже показывают, какая система важнее в текущую секунду." }}</p>
+          </div>
+          <div class="hero-panel">
+            <span class="chip hero-kicker">{{ "Act on the cut" if language == "en" else "Действуй по монтажу" }}</span>
+            <strong>{{ "Use the practical layer to decide what to trim, move, or reinforce." if language == "en" else "Практический слой сразу переводит сигнал в понятные монтажные шаги." }}</strong>
+            <p>{{ "Recommendations are editing hints, not magic. Compare versions, move faster, and test changes against the curve." if language == "en" else "Советы — это не магия, а подсказки для тестов. Сравнивай версии, ускоряй вход и проверяй правки по графику." }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="stack">
+      {% if not pdf_mode %}
+      <form class="card upload-card" action="/review" method="post" enctype="multipart/form-data" data-analysis-form>
+        <div class="section-head">
+          <div>
+            <h2>{{ "New run" if language == "en" else ui.new_run }}</h2>
+            <p class="muted upload-lead">{{ "Upload one video for a single review or 2-4 videos to compare versions. The app processes them one by one." if language == "en" else "Загрузи один ролик для обычного разбора или 2-4 ролика для сравнения версий. Приложение обработает их по очереди." }}</p>
+          </div>
+          <div class="meta-row upload-meta">
+            <span class="pill">{{ "1 video = deep review" if language == "en" else "1 ролик = глубокий разбор" }}</span>
+            <span class="pill">{{ "2–4 videos = comparison" if language == "en" else "2–4 ролика = сравнение" }}</span>
+            <span class="pill">{{ "processed safely in sequence" if language == "en" else "безопасная обработка по очереди" }}</span>
+          </div>
+        </div>
+        <div class="upload-grid">
+          <div class="upload-field-col">
+            <div class="field-stack" style="margin-top: 14px;">
+              <input type="hidden" name="analysis_mode" value="deep">
+              <div class="file-picker" data-file-picker style="margin-top: 0;">
+                <input id="videos-input" class="native-file-input" type="file" name="videos" accept="video/*" multiple required>
+                <button type="button" class="file-picker-button" data-file-picker-trigger>{{ ui.choose_files }}</button>
+                <span class="file-picker-text" data-file-picker-text aria-live="polite">{{ ui.no_files_selected }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="upload-actions">
+            <button type="submit" data-submit-button data-busy-label="{{ 'Running analysis' if language == 'en' else 'Идёт анализ' }}">{{ ui.run_analysis }}</button>
+          </div>
+          <p class="action-note">{{ "Large files are processed one by one so the app stays stable and predictable." if language == "en" else "Тяжёлые файлы идут по очереди, чтобы приложение оставалось стабильным и не перегружало систему." }}</p>
+        </div>
+        <div class="submit-progress" data-submit-progress aria-live="polite">
+          <div class="submit-progress-head">
+            <span>{{ "Running TRIBE analysis..." if language == "en" else "Запускаю анализ TRIBE..." }}</span>
+            <span>{{ "This can take a while" if language == "en" else "Это может занять время" }}</span>
+          </div>
+          <div class="submit-progress-track"><span class="submit-progress-line"></span></div>
+        </div>
+      </form>
+      {% endif %}
+
+      {% if error %}
+      <div class="error">{{ error }}</div>
+      {% endif %}
+
+      {% if result %}
+      <div class="card">
+        {% set analysis_mode_key = "deep" %}
+        {% set editorial = result.editorial %}
+        <div class="result-top">
+          <div>
+            <div class="pill-row result-pills">
+              <p class="chip">Report {{ result.report_id }} В· {{ result.created_at }}</p>
+              <span class="pill">{{ "Compare mode" if result.mode == "compare" and language == "en" else "Режим сравнения" if result.mode == "compare" else "Single review" if language == "en" else "Один ролик" }}</span>
+              {% if result.mode == "compare" %}
+              <span class="pill">{{ result.variants | length }} {{ "versions" if language == "en" else "версии" }}</span>
+              {% else %}
+              <span class="pill">{{ result.video.duration_seconds }} {{ ui.seconds }}</span>
+              {% endif %}
+            </div>
+            <h2 style="margin-top: 10px;">{{ "Comparison of versions" if result.mode == "compare" else "Predicted brain response" }}</h2>
+            <p class="lead" style="font-size: 16px; max-width: 980px;">{{ "This report overlays the TRIBE curves and shows every uploaded version side by side." if result.mode == "compare" else "This report uses the official TRIBE v2 output for the curve and 3D brain map. The recommendation cards below are a separate local interpretation layer built on top of that same run." }}</p>
+          </div>
+          {% if not pdf_mode %}
+          <div class="button-row result-actions">
+            <a class="button-link secondary" href="{{ result.report_url }}" target="_blank" rel="noopener">{{ ui.open_json }}</a>
+            <a class="button-link" href="{{ result.report_pdf_url }}">{{ ui.download_pdf }}</a>
+          </div>
+          {% endif %}
+        </div>
+
+        <div class="banner">{{ "The model shows where the video seems to affect the viewer more or less strongly. It is based on an average viewer model, not one real person. Treat each timestamp as an approximate editing zone and inspect the nearby window around it." if language == "en" else "Модель показывает, где ролик действует сильнее, а где слабее. Это усреднённая модель зрителя, а не реакция одного конкретного человека. Используйте таймкод как примерную зону проверки и смотрите ближайшее окно вокруг него." }}</div>
+        <div class="pill-row quick-nav">
+          {% if result.mode == "compare" %}
+          <a class="pill nav-pill" href="#workspace-{{ result.report_id }}">{{ "Workspace" if language == "en" else "Рабочая зона" }}</a>
+          <a class="pill nav-pill" href="#summary-{{ result.report_id }}">{{ "Summary" if language == "en" else "Итог" }}</a>
+          {% else %}
+          <a class="pill nav-pill" href="#workspace-{{ result.variant_key }}">{{ "Workspace" if language == "en" else "Рабочая зона" }}</a>
+          {% if editorial and editorial.action_items %}
+          <a class="pill nav-pill" href="#actions-{{ result.variant_key }}">{{ "Actions" if language == "en" else "Что делать" }}</a>
+          {% endif %}
+          <a class="pill nav-pill" href="#details-{{ result.variant_key }}">{{ "Details" if language == "en" else "Детали" }}</a>
+          {% endif %}
+        </div>
+
+        {% if result.mode == "compare" %}
+        <div class="section">
+          <div class="editorial-hero">
+            <h3>{{ result.verdict }}</h3>
+            <p>{{ result.executive_summary }}</p>
+            {% if result.product_summary %}
+            <div class="banner" style="margin-top: 14px;">{{ result.product_summary }}</div>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="section" id="workspace-{{ result.report_id }}">
+          <div class="workspace-meta">
+            <p>{{ "Keep the overlay graph in view and compare the strongest and weakest cuts side by side." if language == "en" else "Держи график в поле зрения и сравнивай сильные и слабые варианты рядом." }}</p>
+          </div>
+          <div class="compare-workspace workspace-shell">
+            {% set compare_palette = ["#e2d27d", "#d9b184", "#9fc4a3", "#c69ab8", "#95a4d3"] %}
+            <div class="timeline-card" data-timeline-mode="compare">
+              <h3>{{ "Overlaid predicted response" if language == "en" else "Наложение графиков ответа" }}</h3>
+              <div class="timeline-wrap">
+                <svg class="timeline-svg" viewBox="0 0 860 210" preserveAspectRatio="none">
+                  <defs>
+                    <marker id="compare-axis-arrow" markerWidth="8" markerHeight="8" refX="6.6" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+                      <path d="M0.8,0.8 L7.2,4 L0.8,7.2" fill="none" stroke="#fbf7ee" stroke-opacity="0.82" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path>
+                    </marker>
+                  </defs>
+                  <rect x="0" y="0" width="860" height="210" rx="18" fill="transparent"></rect>
+                  <line x1="18" y1="192" x2="18" y2="18" stroke="#fbf7ee" stroke-opacity="0.78" stroke-width="1.55" marker-end="url(#compare-axis-arrow)"></line>
+                  <line x1="18" y1="192" x2="842" y2="192" stroke="#fbf7ee" stroke-opacity="0.78" stroke-width="1.55" marker-end="url(#compare-axis-arrow)"></line>
+                  <line x1="18" y1="105" x2="842" y2="105" stroke="#fbf7ee" stroke-opacity="0.24" stroke-width="1.05" stroke-dasharray="5 6"></line>
+                  <text class="timeline-scale-label" x="8" y="193" text-anchor="start">0</text>
+                  <text class="timeline-scale-label" x="8" y="109" text-anchor="start">50</text>
+                  <text class="timeline-scale-label" x="8" y="26" text-anchor="start">100</text>
+                  {% for series in result.timeline_overlay.series %}
+                  {% set series_color = compare_palette[loop.index0 % (compare_palette|length)] %}
+                  <polyline class="timeline-series-line" data-timeline-series-index="{{ loop.index0 }}" points="{{ series.points }}" fill="none" stroke="{{ series_color }}" stroke-width="1.05" stroke-linecap="round" stroke-linejoin="round" opacity="0.94"></polyline>
+                  {% endfor %}
+                </svg>
+              </div>
+              {% set overlay_duration = result.timeline_overlay.duration_seconds|float %}
+              <div class="timeline-axis">
+                <span>0{{ ui.seconds }}</span>
+                <span>{{ (overlay_duration * 0.25)|round(1) }}{{ ui.seconds }}</span>
+                <span>{{ (overlay_duration * 0.5)|round(1) }}{{ ui.seconds }}</span>
+                <span>{{ (overlay_duration * 0.75)|round(1) }}{{ ui.seconds }}</span>
+                <span>{{ overlay_duration|round(1) }}{{ ui.seconds }}</span>
+              </div>
+              <div class="compare-legend">
+                {% for series in result.timeline_overlay.series %}
+                {% set series_color = compare_palette[loop.index0 % (compare_palette|length)] %}
+                <span class="compare-legend-item" data-timeline-legend-index="{{ loop.index0 }}"><i class="compare-dot" style="background: {{ series_color }}; color: {{ series_color }};"></i><span class="compare-legend-text">{{ series.name }} · {{ ui.avg }}: {{ series.avg_score }}</span></span>
+                {% endfor %}
+              </div>
+            </div>
+
+            {% if not pdf_mode %}
+            <div class="compare-variant-grid">
+              {% for variant in result.variants %}
+              <div class="compare-variant-column workspace-panel" data-panel-key="{{ variant.variant_key }}">
+                <div class="compare-video-tile">
+                  <div class="compare-tile-head">
+                    <span class="compare-tile-title">#{{ loop.index }} · {{ variant.title }}</span>
+                    <span>{{ ui.avg }}: {{ variant.timeline.avg_score }}</span>
+                  </div>
+                  <video id="video-{{ variant.variant_key }}" src="{{ variant.media_url }}" controls preload="metadata"></video>
+                </div>
+
+                <div class="compare-brain-tile">
+                  <div class="compare-tile-head">
+                    <span class="compare-tile-title">{{ "Brain map" if language == "en" else "Карта мозга" }}</span>
+                    <span>{{ ui.max }}: {{ variant.timeline.max_score }}</span>
+                  </div>
+                  {% if variant.brain_simulation and variant.brain_simulation.available %}
+                  {% set brain_region_panel = variant.brain_simulation.region_panel if variant.brain_simulation.region_panel else {
+                    "title_ru": "Зоны мозга в анализе видео",
+                    "title_en": "Brain zones used in the video analysis",
+                    "hint_ru": "Показаны все крупные зоны коры, которые модель использует при просмотре ролика. Полоски показывают, какая зона активнее в текущий момент.",
+                    "hint_en": "All major brain zones used by the model during the video are shown. The bars indicate which zone is more active at the current moment."
+                  } %}
+                  <div
+                    class="brain-stage"
+                    data-video-id="video-{{ variant.variant_key }}"
+                    data-brain-scene='{{ {"mesh": variant.brain_simulation.mesh, "frames": variant.brain_simulation.frames, "mode": analysis_mode_key, "language": language, "panel": brain_region_panel} | tojson | safe }}'
+                  ></div>
+                  {% else %}
+                  <p class="muted">{{ ui.brain_unavailable }}</p>
+                  {% endif %}
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="section compare-ranking" id="summary-{{ result.report_id }}">
+          <h3>{{ "Comparison summary" if language == "en" else "Итог сравнения" }}</h3>
+          <div class="summary-grid">
+            {% for item in result.ranking %}
+            <div class="summary-card">
+              <div class="chip">#{{ item.rank }} · {{ item.name }}</div>
+              <div class="big-number">{{ item.overall_score }}</div>
+              <p class="muted" style="margin-top: 4px; font-size: 12px;">{{ "comparison score" if language == "en" else "score сравнения" }}</p>
+              {% if item.comparison_signal_avg %}
+              <p class="muted" style="margin-top: 8px; font-size: 12px; line-height: 1.24;">
+                {{ "graph avg" if language == "en" else "среднее графика" }}: {{ item.comparison_signal_avg }} ·
+                {{ "start" if language == "en" else "начало" }}: {{ item.comparison_early_avg }}
+              </p>
+              {% endif %}
+              <p class="muted">{{ item.summary }}</p>
+            </div>
+            {% endfor %}
+          </div>
+          {% if result.recommendations %}
+          <div class="banner" style="margin-top: 16px;">
+            <ul class="list">
+              {% for item in result.recommendations %}
+              <li>{{ item }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+          {% endif %}
+        </div>
+        {% else %}
+
+        {% set editorial = result.editorial %}
+        {% set plain = result.simple_readout.get(language) if result.simple_readout else None %}
+        {% if plain and not editorial %}
+        <div class="section">
+          <h3>{{ plain.title }}</h3>
+          <div class="triptych">
+            <div class="note-card">
+              <div class="chip">{{ plain.summary_title }}</div>
+              <p class="muted" style="margin-top: 14px; line-height: 1.24;">{{ plain.summary_body }}</p>
+            </div>
+            <div class="note-card">
+              <div class="chip">{{ plain.keep_title }}</div>
+              <p class="muted" style="margin-top: 14px; line-height: 1.24;">{{ plain.keep_body }}</p>
+            </div>
+            <div class="note-card">
+              <div class="chip">{{ plain.check_title }}</div>
+              <p class="muted" style="margin-top: 14px; line-height: 1.24;">{{ plain.check_body }}</p>
+            </div>
+          </div>
+          <div class="note-card" style="margin-top: 16px;">
+            <div class="chip">{{ plain.steps_title }}</div>
+            <ul class="list">
+              {% for item in plain.steps %}
+              <li>{{ item }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+        {% endif %}
+        {% set practical = result.practical_readout.get(language) if result.practical_readout else None %}
+        {% if practical and not editorial %}
+        <div class="section">
+          <h3>{{ practical.title }}</h3>
+          <p class="muted" style="margin-top: 10px; line-height: 1.24;">{{ practical.summary }}</p>
+          <div class="triptych">
+            {% for card in practical.cards %}
+            <div class="note-card">
+              <div class="chip">{{ card.title }}</div>
+              <p class="muted" style="margin-top: 14px; line-height: 1.24;">{{ card.detail }}</p>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
+        <div class="section" id="workspace-{{ result.variant_key }}">
+          {% set brain_region_panel = result.brain_simulation.region_panel if result.brain_simulation and result.brain_simulation.region_panel else {
+            "title_ru": "Зоны мозга в анализе видео",
+            "title_en": "Brain zones used in the video analysis",
+            "hint_ru": "Показаны все крупные зоны коры, которые модель использует при просмотре ролика. Полоски показывают, какая зона активнее в текущий момент.",
+            "hint_en": "All major brain zones used by the model during the video are shown. The bars indicate which zone is more active at the current moment."
+          } %}
+          <div class="workspace-meta">
+            <p>{{ "The cleanest workflow is: keep the video on the left, read the curve and brain map in the center, then use the zone bars on the right as a live explanation layer." if language == "en" else "Самый удобный порядок такой: видео слева, график и карта мозга в центре, а полоски зон справа как живой пояснительный слой." }}</p>
+            {% if not pdf_mode and result.brain_simulation and result.brain_simulation.available %}
+            <span class="pill">{{ "Fixed workspace layout for stable reading" if language == "en" else "Фиксированная раскладка для стабильного чтения" }}</span>
+            {% endif %}
+          </div>
+          <div class="player-layout single-analysis-layout{% if not pdf_mode and result.brain_simulation and result.brain_simulation.available %} has-region-column{% endif %} workspace-shell">
+            {% if not pdf_mode %}
+            <div class="player-card workspace-panel">
+              <h3>{{ "Video" if language == "en" else "Видео" }}</h3>
+              <video id="video-{{ result.variant_key }}" src="{{ result.media_url }}" controls preload="metadata"></video>
+            </div>
+            {% endif %}
+            <div class="signal-column workspace-panel workspace-stack">
+              <div class="timeline-card" data-timeline-mode="single">
+                <h3>{{ "Predicted response over time" if language == "en" else "Предсказанный ответ по времени" }}</h3>
+                <p class="muted" style="margin-top: 8px;">{{ "Hover to inspect the timestamp. Click the curve to move the player." if language == "en" else "Наведи, чтобы посмотреть время. Клик по кривой перемещает плеер." }}</p>
+              <div class="timeline-wrap" data-video-id="video-{{ result.variant_key }}" data-timeline-points='{{ result.timeline.points | tojson | safe }}' data-tooltip-label="{{ 'Level' if language == 'en' else 'Уровень' }}">
+                <svg class="timeline-svg" viewBox="0 0 860 210" preserveAspectRatio="none">
+                  <defs>
+                    <marker id="single-axis-arrow" markerWidth="8" markerHeight="8" refX="6.6" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+                      <path d="M0.8,0.8 L7.2,4 L0.8,7.2" fill="none" stroke="#fbf7ee" stroke-opacity="0.82" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path>
+                    </marker>
+                  </defs>
+                  <rect x="0" y="0" width="860" height="210" rx="18" fill="transparent"></rect>
+                  <line x1="18" y1="192" x2="18" y2="18" stroke="#fbf7ee" stroke-opacity="0.78" stroke-width="1.55" marker-end="url(#single-axis-arrow)"></line>
+                  <line x1="18" y1="192" x2="842" y2="192" stroke="#fbf7ee" stroke-opacity="0.78" stroke-width="1.55" marker-end="url(#single-axis-arrow)"></line>
+                  <line x1="18" y1="105" x2="842" y2="105" stroke="#fbf7ee" stroke-opacity="0.24" stroke-width="1.05" stroke-dasharray="5 6"></line>
+                  <text class="timeline-scale-label" x="8" y="193" text-anchor="start">0</text>
+                  <text class="timeline-scale-label" x="8" y="109" text-anchor="start">50</text>
+                  <text class="timeline-scale-label" x="8" y="26" text-anchor="start">100</text>
+                    <polyline class="timeline-series-line" data-timeline-series-index="0" points="{{ result.timeline.svg_points }}" fill="none" stroke="#e2d27d" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"></polyline>
+                  </svg>
+                  <div class="timeline-hover"></div>
+                  <div class="timeline-cursor"></div>
+                  <div class="timeline-playhead"></div>
+                <div class="timeline-tooltip"><strong>00:00</strong><span>{{ "Level" if language == "en" else "Уровень" }}: 0</span></div>
+                </div>
+                {% set video_duration = result.video.duration_seconds|float %}
+                <div class="timeline-axis">
+                  <span>0{{ ui.seconds }}</span>
+                  <span>{{ (video_duration * 0.25)|round(1) }}{{ ui.seconds }}</span>
+                  <span>{{ (video_duration * 0.5)|round(1) }}{{ ui.seconds }}</span>
+                  <span>{{ (video_duration * 0.75)|round(1) }}{{ ui.seconds }}</span>
+                  <span>{{ video_duration|round(1) }}{{ ui.seconds }}</span>
+                </div>
+                <div class="pill-row" style="margin-top: 12px;">
+                  <span class="pill">{{ ui.avg }}: {{ result.timeline.avg_score }}</span>
+                  <span class="pill">{{ ui.max }}: {{ result.timeline.max_score }}</span>
+                  <span class="pill">{{ ui.min }}: {{ result.timeline.min_score }}</span>
+                </div>
+              </div>
+
+              {% if not pdf_mode %}
+              <div class="brain-card">
+                <h3>{{ "Predicted brain map" if language == "en" else "Предсказанная карта активности" }}</h3>
+                {% if result.brain_simulation and result.brain_simulation.available %}
+                <p class="muted" style="margin-top: 8px; line-height: 1.2;">{{ "Large brain zones are tinted by area, and bright hotspots show where the current moment reads stronger." if language == "en" else "Крупные зоны коры окрашены по областям, а яркие пятна показывают, где текущий момент действует сильнее." }}</p>
+                <div class="pill-row" style="margin-top: 12px;">
+                  <span class="pill brain-status" data-brain-label-for="video-{{ result.variant_key }}" data-status-prefix="{{ ui.brain_status }}">{{ ui.brain_status }}: {{ result.brain_simulation.frames[0].timestamp }}</span>
+                  <span class="pill">{{ ui.frames }}: {{ result.brain_simulation.frame_count }}</span>
+                </div>
+                <div class="brain-topbar">
+                  <div class="brain-legend">
+                    <span>{{ ui.brain_activity }}</span>
+                    <div class="brain-legend-bar"></div>
+                    <span>{{ ui.brain_hotspots }}</span>
+                  </div>
+                  <div class="brain-surface-row">
+                    <button type="button" class="brain-surface-toggle" data-brain-for="video-{{ result.variant_key }}" data-brain-surface="normal">{{ ui.brain_normal }}</button>
+                    <button type="button" class="brain-surface-toggle is-active" data-brain-for="video-{{ result.variant_key }}" data-brain-surface="inflated">{{ ui.brain_inflated }}</button>
+                  </div>
+                </div>
+                <div
+                  class="brain-stage"
+                  data-video-id="video-{{ result.variant_key }}"
+                  data-brain-scene='{{ {"mesh": result.brain_simulation.mesh, "frames": result.brain_simulation.frames, "mode": analysis_mode_key, "language": language, "panel": brain_region_panel} | tojson | safe }}'
+                ></div>
+                {% else %}
+                <p class="muted" style="margin-top: 10px;">{{ ui.brain_unavailable }}</p>
+                {% endif %}
+              </div>
+              {% endif %}
+            </div>
+            {% if not pdf_mode and result.brain_simulation and result.brain_simulation.available %}
+            <div class="brain-region-column workspace-panel">
+              <div class="brain-region-panel is-visible" data-brain-region-panel-for="video-{{ result.variant_key }}">
+                <h3 style="font-size: 18px;">{{ brain_region_panel.title_en if language == "en" else brain_region_panel.title_ru }}</h3>
+                <p class="muted" style="margin-top: 8px; line-height: 1.2;">{{ brain_region_panel.hint_en if language == "en" else brain_region_panel.hint_ru }}</p>
+                <div class="brain-region-grid" data-brain-region-grid-for="video-{{ result.variant_key }}"></div>
+              </div>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+
+        {% if editorial %}
+        <div class="section">
+          <div class="editorial-hero">
+            <h3>{{ editorial.verdict }}</h3>
+            <p>{{ editorial.executive_summary }}</p>
+            {% if editorial.product_summary %}
+            <div class="banner" style="margin-top: 14px;">{{ editorial.product_summary }}</div>
+            {% endif %}
+          </div>
+        </div>
+
+        {% if editorial.action_items %}
+        <div class="section" id="actions-{{ result.variant_key }}">
+          <h3>{{ ui.what_to_do }}</h3>
+          <div class="banner" style="margin-top: 14px;">
+            {{ "The recommendations below are general editing hints. The main thing to watch is the \"Predicted response over time\" curve: look at the dips, compare what happens there with stronger moments, experiment with edits, and run comparative tests to find the best version." if language == "en" else "Ниже приведены общие рекомендации. Главное, на что стоит обращать внимание, — график «Предсказанный ответ по времени»: смотрите на провалы, сравнивайте эти места с участками, где значения выше, экспериментируйте с правками и проводите сравнительные тесты, чтобы найти лучший вариант." }}
+          </div>
+          <div class="triptych">
+            {% for item in editorial.action_items %}
+            <div class="note-card">
+              <div class="chip">{{ item.timestamp }}</div>
+              <h3 style="margin-top: 14px;">{{ item.title }}</h3>
+              {% if item.instruction and item.instruction != item.title %}
+                <p class="muted" style="margin-top: 12px; line-height: 1.24;">{{ item.instruction }}</p>
+              {% endif %}
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
+        <div class="section" id="details-{{ result.variant_key }}">
+          <details class="fold" open>
+            <summary>{{ ui.open_numbers }}</summary>
+            <div class="metrics-row">
+              {% for metric in editorial.metrics %}
+              <div class="summary-card">
+                <div class="chip">{{ metric.label }}</div>
+                <div class="big-number">{{ metric.score }}</div>
+                <p class="muted">{{ metric.summary }}</p>
+              </div>
+              {% endfor %}
+            </div>
+            <div class="summary-grid" style="margin-top: 12px;">
+              {% for item in editorial.seek_targets %}
+              {% if item.kind != "speech" and item.kind != "drop" %}
+              <div class="summary-card">
+                <div class="chip">{{ item.label }}</div>
+                <div class="score-badge">{{ item.timestamp }}</div>
+                <p class="muted">{{ item.summary }}</p>
+              </div>
+              {% endif %}
+              {% endfor %}
+            </div>
+          </details>
+        </div>
+
+        <div class="section">
+          <details class="fold" open>
+            <summary>{{ ui.open_speech }}</summary>
+            <div class="triptych" style="margin-top: 16px;">
+              <div class="note-card">
+                <div class="chip">{{ ui.speech_title }}</div>
+                {% if editorial.speech and editorial.speech.available %}
+                <p class="muted" style="margin-top: 12px; line-height: 1.24;">{{ editorial.speech.note or editorial.speech.message }}</p>
+                <div class="pill-row" style="margin-top: 12px;">
+                  {% for item in editorial.speech.metrics %}
+                  <span class="pill">{{ item.label }}: {{ item.value }}</span>
+                  {% endfor %}
+                </div>
+                {% else %}
+                <p class="muted" style="margin-top: 12px; line-height: 1.24;">{{ editorial.speech.message if editorial.speech else '' }}</p>
+                {% endif %}
+              </div>
+              <div class="note-card" style="grid-column: span 2;">
+                <div class="chip">{{ ui.full_text }}</div>
+                <p class="muted" style="margin-top: 12px; line-height: 1.24;">{{ editorial.speech.text if editorial.speech and editorial.speech.text else ui.footer_deep }}</p>
+              </div>
+            </div>
+          </details>
+          <p class="footer-note">{{ ui.footer_deep }}</p>
+        </div>
+        {% endif %}
+
+        <div class="section">
+          <h3>{{ "Prediction details" if language == "en" else "Детали разбора" }}</h3>
+          <div class="summary-grid">
+            <div class="summary-card">
+              <div class="chip">{{ "Duration" if language == "en" else "Длительность" }}</div>
+              <div class="big-number">{{ result.video.duration_seconds }}</div>
+              <p class="muted">{{ "seconds" if language == "en" else "секунд" }}</p>
+            </div>
+            <div class="summary-card">
+              <div class="chip">{{ "Video size" if language == "en" else "Размер видео" }}</div>
+              <div class="score-badge">{{ result.video.resolution }}</div>
+              <p class="muted">{{ result.video.fps }} {{ "frames per second" if language == "en" else "кадров в секунду" }}</p>
+            </div>
+            <div class="summary-card">
+              <div class="chip">{{ "Parts in analysis" if language == "en" else "Сколько частей взято в разбор" }}</div>
+              <div class="big-number">{{ result.predictions.events_count }}</div>
+              <p class="muted">{{ "This is how many pieces the model used to build the read." if language == "en" else "Столько частей модель использовала, чтобы собрать разбор." }}</p>
+            </div>
+            <div class="summary-card">
+              <div class="chip">{{ "Strongest moment on the graph" if language == "en" else "Где график сильнее всего" }}</div>
+              <div class="score-badge">{{ result.predictions.peak_time }}</div>
+              <p class="muted">{{ "Here the curve rises higher than anywhere else in this video." if language == "en" else "Здесь кривая поднимается выше всего в этом ролике." }}</p>
+            </div>
+          </div>
+        </div>
+
+        {% endif %}
+      </div>
+      {% endif %}
+    </div>
+    {% if not pdf_mode %}
+    <div class="sources-footer">
+      <div class="sources-footer-copy">
+        <h3>{{ "Official model sources" if language == "en" else "Официальные источники модели" }}</h3>
+        <p>{{ "Materials published by the model authors and the official TRIBE v2 release page." if language == "en" else "Материалы от авторов модели и официальная страница релиза TRIBE v2." }}</p>
+        <p class="sources-footer-note">This is a non-commercial community share. We do not claim ownership of the model, brand assets, or source materials, and we do not plan to sell this project or any related rights.</p>
+      </div>
+      <div class="sources-footer-actions">
+        <a class="button-link secondary" href="https://ai.meta.com/research/publications/a-foundation-model-of-vision-audition-and-language-for-in-silico-neuroscience/" target="_blank" rel="noopener">{{ "Meta AI publication" if language == "en" else "Публикация Meta AI" }}</a>
+        <a class="button-link secondary" href="https://huggingface.co/facebook/tribev2" target="_blank" rel="noopener">{{ "TRIBE v2 model page" if language == "en" else "Страница TRIBE v2" }}</a>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+  {% if not pdf_mode %}
+  <script src="/static/vendor/three.min.js"></script>
+  <script src="/static/vendor/OrbitControls.js"></script>
+  <script>
+    (() => {
+      const chooseFilesLabel = {{ ui.choose_files|tojson }};
+      const noFilesSelectedLabel = {{ ui.no_files_selected|tojson }};
+    const responseLabel = {{ ("Level" if language == "en" else "Уровень")|tojson }};
+      const brainLoadError = {{ ("3D engine did not load. Refresh the page and try again." if language == "en" else "3D-движок не загрузился. Обнови страницу и попробуй ещё раз.")|tojson }};
+      const brainWebglError = {{ ("WebGL is unavailable in this browser, so the 3D brain view cannot render." if language == "en" else "В этом браузере нет WebGL, поэтому 3D-вид мозга не может отрисоваться.")|tojson }};
+      const brainRegionPrimary = {{ ("more active now" if language == "en" else "заметна сильнее")|tojson }};
+      const brainRegionSecondary = {{ ("active now" if language == "en" else "заметна сейчас")|tojson }};
+      const brainRegionLow = {{ ("low activity" if language == "en" else "низкая активность")|tojson }};
+      const brainRegionUnavailable = {{ ("The model does not highlight one large brain zone strongly enough in this moment." if language == "en" else "В этот момент модель не выделяет одну крупную зону достаточно явно.")|tojson }};
+      const timelinePalette = ["#e2d27d", "#d9b184", "#9fc4a3", "#c69ab8", "#95a4d3"];
+
+      function hexToRgb(hex) {
+        const raw = String(hex || "").replace("#", "");
+        if (raw.length !== 6) return [0.44, 0.48, 0.54];
+        const value = Number.parseInt(raw, 16);
+        if (Number.isNaN(value)) return [0.44, 0.48, 0.54];
+        return [
+          ((value >> 16) & 255) / 255,
+          ((value >> 8) & 255) / 255,
+          (value & 255) / 255,
+        ];
+      }
+
+      function escapeHtml(value) {
+        return String(value ?? "")
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll("\"", "&quot;")
+          .replaceAll("'", "&#39;");
+      }
+
+      function bindFilePicker() {
+        const picker = document.querySelector("[data-file-picker]");
+        if (!picker) return;
+        const input = picker.querySelector(".native-file-input");
+        const trigger = picker.querySelector("[data-file-picker-trigger]");
+        const label = picker.querySelector("[data-file-picker-text]");
+        if (!input || !trigger || !label) return;
+
+        trigger.addEventListener("click", () => input.click());
+        input.addEventListener("change", () => {
+          if (!input.files || !input.files.length) {
+            label.textContent = noFilesSelectedLabel;
+            return;
+          }
+          label.textContent = Array.from(input.files).map((file) => file.name).join(", ");
+        });
+      }
+
+      function bindSubmitProgress() {
+        const form = document.querySelector("[data-analysis-form]");
+        if (!form) return;
+        const submitButton = form.querySelector("[data-submit-button]");
+        const progress = form.querySelector("[data-submit-progress]");
+        form.addEventListener("submit", () => {
+          if (progress) {
+            progress.classList.add("is-visible");
+          }
+          if (submitButton) {
+            submitButton.disabled = true;
+            submitButton.classList.add("is-loading");
+            if (submitButton.dataset.busyLabel) {
+              submitButton.textContent = submitButton.dataset.busyLabel;
+            }
+          }
+        });
+      }
+
+      function bindThemeToggle() {
+        const toggle = document.querySelector("[data-theme-toggle]");
+        if (!toggle) return;
+        const storageKey = "tribe-ui-theme";
+
+        function applyTheme(theme) {
+          const nextTheme = theme === "light" ? "theme-light" : "theme-dark";
+          document.body.classList.remove("theme-light", "theme-dark");
+          document.body.classList.add(nextTheme);
+          document.documentElement.setAttribute("data-tribe-theme", theme === "light" ? "light" : "dark");
+          toggle.setAttribute("aria-pressed", nextTheme === "theme-dark" ? "true" : "false");
+        }
+
+        try {
+          const savedTheme = window.localStorage.getItem(storageKey);
+          if (savedTheme === "light" || savedTheme === "dark") {
+            applyTheme(savedTheme);
+          } else {
+            applyTheme(document.body.classList.contains("theme-dark") ? "dark" : "light");
+          }
+        } catch (error) {
+          applyTheme(document.body.classList.contains("theme-dark") ? "dark" : "light");
+        }
+
+        toggle.addEventListener("click", () => {
+          const next = document.body.classList.contains("theme-dark") ? "light" : "dark";
+          applyTheme(next);
+          try {
+            window.localStorage.setItem(storageKey, next);
+          } catch (error) {
+            // Ignore storage failures and keep the active theme for the session.
+          }
+        });
+      }
+
+      function shufflePalette(colors) {
+        const pool = [...colors];
+        for (let index = pool.length - 1; index > 0; index -= 1) {
+          const swapIndex = Math.floor(Math.random() * (index + 1));
+          [pool[index], pool[swapIndex]] = [pool[swapIndex], pool[index]];
+        }
+        return pool;
+      }
+
+      function applyTimelineColors() {
+        document.querySelectorAll(".timeline-card[data-timeline-mode]").forEach((card) => {
+          const mode = card.dataset.timelineMode || "single";
+          const lines = Array.from(card.querySelectorAll(".timeline-series-line"));
+          if (!lines.length) return;
+
+          let assignedColors = [];
+          if (mode === "single") {
+            assignedColors = [timelinePalette[Math.floor(Math.random() * timelinePalette.length)]];
+          } else {
+            const shuffled = shufflePalette(timelinePalette);
+            assignedColors = lines.map((_, index) => shuffled[index % shuffled.length]);
+          }
+
+          lines.forEach((line, index) => {
+            line.style.stroke = assignedColors[index % assignedColors.length];
+          });
+
+          card.querySelectorAll("[data-timeline-legend-index]").forEach((legend) => {
+            const legendIndex = Number(legend.dataset.timelineLegendIndex || 0);
+            const color = assignedColors[legendIndex % assignedColors.length];
+            const dot = legend.querySelector(".compare-dot");
+            if (dot) {
+              dot.style.background = color;
+              dot.style.color = color;
+            }
+          });
+        });
+      }
+
+      function bindDraggableBoards() {
+        if (!window.matchMedia || !window.matchMedia("(pointer:fine)").matches) return;
+        const boards = Array.from(document.querySelectorAll("[data-draggable-board]"));
+        boards.forEach((board) => {
+          const scope = board.dataset.panelOrderScope;
+          if (!scope) return;
+          const storageKey = `tribe-ui-order:${scope}`;
+
+          function items() {
+            return Array.from(board.children).filter((child) => child.matches("[data-panel-key]"));
+          }
+
+          function persistOrder() {
+            try {
+              const order = items().map((item) => item.dataset.panelKey).filter(Boolean);
+              window.localStorage.setItem(storageKey, JSON.stringify(order));
+            } catch (error) {
+              // Ignore storage failures and keep the current visual order.
+            }
+          }
+
+          function restoreOrder() {
+            try {
+              const raw = window.localStorage.getItem(storageKey);
+              if (!raw) return;
+              const order = JSON.parse(raw);
+              if (!Array.isArray(order) || !order.length) return;
+              const lookup = new Map(items().map((item) => [item.dataset.panelKey, item]));
+              order.forEach((key) => {
+                const node = lookup.get(key);
+                if (node) {
+                  board.appendChild(node);
+                }
+              });
+            } catch (error) {
+              // Ignore invalid saved layouts.
+            }
+          }
+
+          restoreOrder();
+
+          let dragged = null;
+
+          function clearTargets() {
+            items().forEach((item) => item.classList.remove("drop-target"));
+          }
+
+          items().forEach((item) => {
+            item.addEventListener("dragstart", (event) => {
+              dragged = item;
+              item.classList.add("dragging");
+              if (event.dataTransfer) {
+                event.dataTransfer.effectAllowed = "move";
+                event.dataTransfer.setData("text/plain", item.dataset.panelKey || "");
+              }
+            });
+
+            item.addEventListener("dragend", () => {
+              item.classList.remove("dragging");
+              clearTargets();
+              dragged = null;
+              persistOrder();
+            });
+
+            item.addEventListener("dragover", (event) => {
+              if (!dragged || dragged === item) return;
+              event.preventDefault();
+              if (event.dataTransfer) {
+                event.dataTransfer.dropEffect = "move";
+              }
+            });
+
+            item.addEventListener("dragenter", (event) => {
+              if (!dragged || dragged === item) return;
+              event.preventDefault();
+              clearTargets();
+              item.classList.add("drop-target");
+              const ordered = items();
+              const draggedIndex = ordered.indexOf(dragged);
+              const targetIndex = ordered.indexOf(item);
+              if (draggedIndex === -1 || targetIndex === -1) return;
+              if (draggedIndex < targetIndex) {
+                board.insertBefore(dragged, item.nextSibling);
+              } else {
+                board.insertBefore(dragged, item);
+              }
+            });
+
+            item.addEventListener("drop", (event) => {
+              if (!dragged || dragged === item) return;
+              event.preventDefault();
+              clearTargets();
+              persistOrder();
+            });
+          });
+        });
+      }
+
+      function bindTimeline(wrap) {
+        const points = JSON.parse(wrap.dataset.timelinePoints || "[]");
+        if (!points.length) return;
+        const hover = wrap.querySelector(".timeline-hover");
+        const cursor = wrap.querySelector(".timeline-cursor");
+        const playhead = wrap.querySelector(".timeline-playhead");
+        const tooltip = wrap.querySelector(".timeline-tooltip");
+        const tooltipTime = tooltip.querySelector("strong");
+        const tooltipSignal = tooltip.querySelector("span");
+        const tooltipLabel = (wrap.dataset.tooltipLabel || responseLabel).includes("Р") ? responseLabel : (wrap.dataset.tooltipLabel || responseLabel);
+        const video = document.getElementById(wrap.dataset.videoId);
+        let rafId = 0;
+
+        function pointFromClientX(clientX) {
+          const rect = wrap.getBoundingClientRect();
+          const x = Math.max(0, Math.min(clientX - rect.left, rect.width));
+          const ratio = rect.width <= 0 ? 0 : x / rect.width;
+          const index = Math.max(0, Math.min(points.length - 1, Math.round(ratio * (points.length - 1))));
+          return { point: points[index], x, rect };
+        }
+
+        function paint(clientX) {
+          const data = pointFromClientX(clientX);
+          cursor.style.opacity = "1";
+          tooltip.style.opacity = "1";
+          cursor.style.left = `${data.x}px`;
+          tooltipTime.textContent = data.point.timestamp;
+          tooltipSignal.textContent = `${tooltipLabel}: ${data.point.signal_score}`;
+          const tooltipWidth = 128;
+          const clampedLeft = Math.max(tooltipWidth / 2, Math.min(data.x, data.rect.width - tooltipWidth / 2));
+          tooltip.style.left = `${clampedLeft}px`;
+          return data.point;
+        }
+
+        function syncPlayhead() {
+          if (!video) return;
+          const rect = wrap.getBoundingClientRect();
+          const duration = Number(video.duration || 0);
+          const ratio = duration > 0 ? Math.max(0, Math.min(video.currentTime / duration, 1)) : 0;
+          playhead.style.left = `${rect.width * ratio}px`;
+        }
+
+        function tick() {
+          syncPlayhead();
+          if (!video || video.paused || video.ended) {
+            rafId = 0;
+            return;
+          }
+          rafId = window.requestAnimationFrame(tick);
+        }
+
+        function ensureTicker() {
+          if (!rafId) {
+            rafId = window.requestAnimationFrame(tick);
+          }
+        }
+
+        hover.addEventListener("mousemove", (event) => paint(event.clientX));
+        hover.addEventListener("mouseenter", (event) => paint(event.clientX));
+        hover.addEventListener("mouseleave", () => {
+          cursor.style.opacity = "0";
+          tooltip.style.opacity = "0";
+        });
+        hover.addEventListener("click", (event) => {
+          const point = paint(event.clientX);
+          if (!video) return;
+          video.currentTime = Number(point.seconds || 0);
+          if (video.paused) video.play().catch(() => {});
+        });
+
+        if (video) {
+          video.addEventListener("timeupdate", syncPlayhead);
+          video.addEventListener("loadedmetadata", syncPlayhead);
+          video.addEventListener("seeked", syncPlayhead);
+          video.addEventListener("play", ensureTicker);
+          video.addEventListener("pause", syncPlayhead);
+          video.addEventListener("ended", syncPlayhead);
+          syncPlayhead();
+        }
+      }
+
+      function palette(t) {
+        const x = Math.max(0, Math.min(t, 1));
+        const c1 = [59, 63, 69];
+        const c2 = [203, 48, 6];
+        const c3 = [255, 141, 29];
+        const c4 = [255, 241, 178];
+        function mix(a, b, ratio) {
+          return [
+            a[0] + (b[0] - a[0]) * ratio,
+            a[1] + (b[1] - a[1]) * ratio,
+            a[2] + (b[2] - a[2]) * ratio,
+          ];
+        }
+        if (x < 0.35) return mix(c1, c2, x / 0.35);
+        if (x < 0.72) return mix(c2, c3, (x - 0.35) / 0.37);
+        return mix(c3, c4, (x - 0.72) / 0.28);
+      }
+
+      function createBrainScene(stage) {
+        const sceneData = JSON.parse(stage.dataset.brainScene || "{}");
+        const meshData = sceneData.mesh || {};
+        const rawFrames = sceneData.frames || [];
+        const video = document.getElementById(stage.dataset.videoId);
+        const status = document.querySelector(`.brain-status[data-brain-label-for="${stage.dataset.videoId}"]`);
+        const card = stage.closest(".brain-card");
+        const surfaceButtons = Array.from(card ? card.querySelectorAll(`.brain-surface-toggle[data-brain-for="${stage.dataset.videoId}"]`) : []);
+        const regionPanel = document.querySelector(`.brain-region-panel[data-brain-region-panel-for="${stage.dataset.videoId}"]`);
+        const regionGrid = document.querySelector(`.brain-region-grid[data-brain-region-grid-for="${stage.dataset.videoId}"]`);
+        const compactBrain = Boolean(stage.closest(".compare-brain-tile"));
+
+        if (!window.THREE) {
+          stage.innerHTML = `<div class="note-card" style="margin:16px;"><p class="muted">${brainLoadError}</p></div>`;
+          return;
+        }
+        if (!video || !meshData.surfaces || !meshData.faces || !meshData.bg_map || !rawFrames.length) return;
+
+        const THREE = window.THREE;
+        const OrbitControlsCtor = window.OrbitControls || THREE.OrbitControls;
+        const surfaces = Object.fromEntries(
+          Object.entries(meshData.surfaces || {}).map(([key, values]) => [key, Float32Array.from(values, (value) => Number(value || 0))]),
+        );
+        const surfaceKeys = Object.keys(surfaces);
+        if (!surfaceKeys.length) return;
+
+        const bgValues = Float32Array.from(meshData.bg_map || [], (value) => Number(value || 0) / 255);
+        const faces = Uint32Array.from(meshData.faces || [], (value) => Number(value || 0));
+        const regionIds = Uint8Array.from(meshData.region_ids || [], (value) => Number(value || 0));
+        const regions = (meshData.regions || []).map((item) => ({
+          ...item,
+          id: Number(item.id || 0),
+          colorRgb: hexToRgb(item.color || "#74808d"),
+        }));
+        const regionById = new Map(regions.map((item) => [item.id, item]));
+        const frames = rawFrames.map((frame) => ({
+          index: Number(frame.index || 0),
+          seconds: Number(frame.seconds || 0),
+          timestamp: frame.timestamp || "00:00",
+          signal: Float32Array.from(frame.signal || [], (value) => Number(value || 0) / 255),
+          regionScores: Array.isArray(frame.region_scores) ? frame.region_scores.map((value) => Number(value || 0)) : [],
+          regionPeakScores: Array.isArray(frame.region_peak_scores) ? frame.region_peak_scores.map((value) => Number(value || 0)) : [],
+        }));
+        if (!bgValues.length || !faces.length || !frames[0].signal.length) return;
+        let renderer;
+        try {
+          renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" });
+        } catch (error) {
+          stage.innerHTML = `<div class="note-card" style="margin:16px;"><p class="muted">${brainWebglError}</p></div>`;
+          return;
+        }
+
+        const minStageSize = compactBrain ? 160 : 320;
+        const width = Math.max(stage.clientWidth, compactBrain ? 220 : 320);
+        const height = Math.max(stage.clientHeight, minStageSize);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+        renderer.setSize(width, height);
+        renderer.outputEncoding = THREE.sRGBEncoding;
+        renderer.setClearColor(0x000000, 0);
+        renderer.domElement.className = "brain-canvas";
+        renderer.domElement.style.touchAction = "none";
+        stage.replaceChildren(renderer.domElement);
+
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(compactBrain ? 30 : 29, width / height, 0.1, 100);
+        camera.position.set(compactBrain ? 0.72 : 0.9, compactBrain ? 0.28 : 0.45, compactBrain ? 4.25 : 4.4);
+
+        const controls = OrbitControlsCtor ? new OrbitControlsCtor(camera, renderer.domElement) : null;
+        if (controls) {
+          controls.target.set(0, compactBrain ? 0.0 : -0.02, 0.02);
+          controls.enablePan = false;
+          controls.enableDamping = true;
+          controls.dampingFactor = 0.06;
+          controls.minDistance = 1.5;
+          controls.maxDistance = 10.0;
+          controls.minPolarAngle = 0;
+          controls.maxPolarAngle = Math.PI;
+          controls.update();
+        } else {
+          camera.lookAt(0, -0.02, 0.02);
+        }
+
+        scene.add(new THREE.HemisphereLight(0xe2e8ef, 0x05070a, 0.46));
+        const keyLight = new THREE.DirectionalLight(0xf3f6fb, 0.56);
+        keyLight.position.set(2.4, 2.0, 2.9);
+        scene.add(keyLight);
+        const fillLight = new THREE.DirectionalLight(0xaebfd5, 0.18);
+        fillLight.position.set(-2.8, -0.4, 1.8);
+        scene.add(fillLight);
+        const rimLight = new THREE.DirectionalLight(0xd7e1ee, 0.26);
+        rimLight.position.set(-0.4, 1.2, -2.8);
+        scene.add(rimLight);
+
+        const shadow = new THREE.Mesh(
+          new THREE.CircleGeometry(1.18, 64),
+          new THREE.MeshBasicMaterial({ color: 0x000000, opacity: 0.22, transparent: true }),
+        );
+        shadow.rotation.x = -Math.PI / 2;
+        shadow.scale.set(1.4, 0.76, 1);
+        shadow.position.set(0.0, -1.02, 0.05);
+        scene.add(shadow);
+
+        const root = new THREE.Group();
+        root.rotation.set(-1.18, -0.18, 1.46);
+        root.position.y = compactBrain ? 0.0 : -0.02;
+        root.scale.setScalar(compactBrain ? 1.02 : 1);
+        scene.add(root);
+
+        const geometry = new THREE.BufferGeometry();
+        const positionArray = new Float32Array(surfaces[meshData.default_surface] || surfaces[surfaceKeys[0]]);
+        const positionAttribute = new THREE.BufferAttribute(positionArray, 3);
+        geometry.setAttribute("position", positionAttribute);
+        geometry.setIndex(Array.from(faces));
+
+        const colorArray = new Float32Array(bgValues.length * 3);
+        const activityArray = new Float32Array(frames[0].signal.length);
+        const activityAttribute = new THREE.BufferAttribute(activityArray, 1);
+        const colorAttribute = new THREE.BufferAttribute(colorArray, 3);
+        geometry.setAttribute("color", colorAttribute);
+        geometry.setAttribute("activity", activityAttribute);
+        geometry.computeVertexNormals();
+
+        const baseMaterial = new THREE.MeshStandardMaterial({
+          vertexColors: true,
+          roughness: 0.98,
+          metalness: 0.0,
+        });
+
+        const overlayMaterial = new THREE.ShaderMaterial({
+          transparent: true,
+          depthWrite: false,
+          blending: THREE.AdditiveBlending,
+          uniforms: { intensity: { value: 1.2 } },
+          vertexShader: `
+            attribute float activity;
+            varying float vActivity;
+            varying vec3 vNormalDir;
+            varying vec3 vViewDir;
+            void main() {
+              vActivity = activity;
+              vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+              vNormalDir = normalize(normalMatrix * normal);
+              vViewDir = normalize(-mvPosition.xyz);
+              gl_Position = projectionMatrix * mvPosition;
+            }
+          `,
+          fragmentShader: `
+            varying float vActivity;
+            varying vec3 vNormalDir;
+            varying vec3 vViewDir;
+            uniform float intensity;
+            vec3 palette(float t) {
+              vec3 c1 = vec3(0.23, 0.25, 0.27);
+              vec3 c2 = vec3(0.79, 0.19, 0.02);
+              vec3 c3 = vec3(1.0, 0.55, 0.11);
+              vec3 c4 = vec3(1.0, 0.95, 0.72);
+              float x = clamp(t, 0.0, 1.0);
+              if (x < 0.35) return mix(c1, c2, x / 0.35);
+              if (x < 0.72) return mix(c2, c3, (x - 0.35) / 0.37);
+              return mix(c3, c4, (x - 0.72) / 0.28);
+            }
+            void main() {
+              float hot = smoothstep(0.08, 0.82, vActivity);
+              hot = pow(hot, 0.7);
+              if (hot <= 0.001) discard;
+              float rim = pow(1.0 - max(dot(normalize(vNormalDir), normalize(vViewDir)), 0.0), 1.45);
+              float alpha = clamp((hot * 1.15 + rim * 0.2) * intensity, 0.0, 1.0);
+              vec3 color = palette(hot) * (0.85 + hot * 0.6 + rim * 0.18);
+              gl_FragColor = vec4(color, alpha);
+            }
+          `,
+        });
+
+        const auraMaterial = overlayMaterial.clone();
+        auraMaterial.side = THREE.BackSide;
+        auraMaterial.uniforms = { intensity: { value: 0.7 } };
+
+        const baseMesh = new THREE.Mesh(geometry, baseMaterial);
+        const overlayMesh = new THREE.Mesh(geometry, overlayMaterial);
+        const auraMesh = new THREE.Mesh(geometry, auraMaterial);
+        auraMesh.scale.setScalar(1.014);
+        const regionLineMesh = new THREE.Mesh(
+          geometry,
+          new THREE.MeshBasicMaterial({
+            color: 0x0a0e13,
+            wireframe: true,
+            transparent: true,
+            opacity: 0.075,
+            depthWrite: false,
+          }),
+        );
+        regionLineMesh.scale.setScalar(1.003);
+        regionLineMesh.visible = false;
+        root.add(baseMesh);
+        root.add(regionLineMesh);
+        root.add(auraMesh);
+        root.add(overlayMesh);
+
+        let currentSurfaceKey = meshData.default_surface && surfaces[meshData.default_surface] ? meshData.default_surface : surfaceKeys[0];
+        let targetSurfaceKey = currentSurfaceKey;
+        let displayedSignal = new Float32Array(frames[0].signal);
+        let regionView = targetSurfaceKey === "inflated";
+        let regionCardNodes = [];
+        let lastRegionLevels = [];
+        let lastRegionLabels = [];
+        const regionScoreCaps = regions.map((_, index) => (
+          frames.reduce((max, frame) => Math.max(max, Number((frame.regionScores || [])[index] || 0)), 0)
+        ));
+        const regionPeakCaps = regions.map((_, index) => (
+          frames.reduce((max, frame) => {
+            const peakValue = Number((frame.regionPeakScores || [])[index] || 0);
+            const scoreValue = Number((frame.regionScores || [])[index] || 0);
+            return Math.max(max, peakValue, scoreValue);
+          }, 0)
+        ));
+        const scenePeakCap = Math.max(...regionPeakCaps, 1e-6);
+        const regionVisibilityGates = regionPeakCaps.map((cap) => {
+          const ratio = scenePeakCap > 0 ? Math.max(0, cap / scenePeakCap) : 0;
+          return 0.24 + 0.76 * Math.pow(ratio, 0.22);
+        });
+
+        function syncRegionMode() {
+          regionView = targetSurfaceKey === "inflated";
+          regionLineMesh.visible = regionView;
+          if (regionPanel) {
+            regionPanel.classList.toggle("is-visible", regionView);
+          }
+          lastRegionLevels = new Array(regions.length).fill(-1);
+          lastRegionLabels = new Array(regions.length).fill("");
+          updateSignalFromTime(Number(video.currentTime || 0));
+        }
+
+        function getBaseColor(index) {
+          const neutral = 0.13 + bgValues[index] * 0.1;
+          if (!regionView || regionIds.length !== bgValues.length) {
+            return [neutral, neutral, neutral];
+          }
+          const region = regionById.get(regionIds[index]);
+          if (!region) {
+            return [neutral, neutral, neutral];
+          }
+          return [
+            neutral * 0.34 + region.colorRgb[0] * 0.62,
+            neutral * 0.34 + region.colorRgb[1] * 0.62,
+            neutral * 0.34 + region.colorRgb[2] * 0.62,
+          ];
+        }
+
+        function ensureRegionCards() {
+          if (!regionGrid || !regions.length) return;
+          if (regionCardNodes.length === regions.length) return;
+          regionGrid.innerHTML = regions.map((item) => {
+            const label = sceneData.language === "en" ? item.label_en : item.label_ru;
+            const description = sceneData.language === "en" ? item.description_en : item.description_ru;
+            return `
+              <article class="brain-region-card" data-region-card>
+                <div class="brain-region-head">
+                  <div class="brain-region-name">
+                    <span class="brain-region-swatch" style="background:${escapeHtml(item.color)};"></span>
+                    <span>${escapeHtml(label)}</span>
+                  </div>
+                  <span class="brain-region-level">${escapeHtml(brainRegionLow)}</span>
+                </div>
+                <p>${escapeHtml(description)}</p>
+                <div class="brain-region-meter" style="--region-color:${escapeHtml(item.color)}; --region-level:0"><span></span></div>
+              </article>
+            `;
+          }).join("");
+          regionCardNodes = Array.from(regionGrid.querySelectorAll("[data-region-card]")).map((card) => ({
+            card,
+            level: card.querySelector(".brain-region-level"),
+            meter: card.querySelector(".brain-region-meter"),
+          }));
+          lastRegionLevels = new Array(regions.length).fill(-1);
+          lastRegionLabels = new Array(regions.length).fill("");
+        }
+
+        function resolveRegionLabel(level, previousLabel) {
+          if (previousLabel === brainRegionPrimary) {
+            if (level >= 0.14) return brainRegionPrimary;
+            return level >= 0.05 ? brainRegionSecondary : brainRegionLow;
+          }
+          if (previousLabel === brainRegionSecondary) {
+            if (level >= 0.2) return brainRegionPrimary;
+            return level >= 0.035 ? brainRegionSecondary : brainRegionLow;
+          }
+          return level >= 0.18 ? brainRegionPrimary : level >= 0.055 ? brainRegionSecondary : brainRegionLow;
+        }
+
+        function updateRegionPanel(scores, peakScores) {
+          if (!regionView || !regionGrid || !regions.length) return;
+          ensureRegionCards();
+          const panelScores = Array.isArray(scores) ? scores : [];
+          const panelPeakScores = Array.isArray(peakScores) ? peakScores : [];
+          const meterDeadZone = 0.012;
+          const hotspotStart = 0.22;
+          const hotspotGain = 0.45;
+          const hotspotCap = 0.34;
+
+          const relevant = regions
+            .map((region, index) => {
+              const score = Number(panelScores[index] || 0);
+              const peak = Number(panelPeakScores[index] || 0);
+              const currentLevel = Math.max(0, Math.min(1, score));
+              const peakLevel = Math.max(0, Math.min(1, peak));
+              const scoreCap = Math.max(regionScoreCaps[index] || 0, 1e-6);
+              const peakCap = Math.max(regionPeakCaps[index] || 0, scoreCap, 1e-6);
+              const visibilityGate = regionVisibilityGates[index] || 1;
+              const relativeCurrent = currentLevel / scoreCap;
+              const relativePeak = peakLevel / peakCap;
+              const hotspotAssist = peakLevel > hotspotStart
+                ? Math.min(hotspotCap, (peakLevel - hotspotStart) * hotspotGain)
+                : 0;
+              const relativeBlend = Math.max(relativeCurrent * 0.92, relativePeak * 0.82) * visibilityGate;
+              const absoluteBlend = Math.max(currentLevel * 1.2, hotspotAssist);
+              const meterLevelRaw = Math.max(absoluteBlend, relativeBlend);
+              const meterLevel = meterLevelRaw <= meterDeadZone ? 0 : meterLevelRaw;
+              return { ...region, score: currentLevel, peak: peakLevel, meterLevel };
+            });
+          relevant.forEach((item, index) => {
+            const nodes = regionCardNodes[index];
+            if (!nodes) return;
+            const targetLevel = Math.max(0, Math.min(1, Number(item.meterLevel.toFixed(4))));
+            const nextLevel = lastRegionLevels[index] < 0
+              ? targetLevel
+              : Number((lastRegionLevels[index] + (targetLevel - lastRegionLevels[index]) * 0.38).toFixed(4));
+            const nextLabel = resolveRegionLabel(nextLevel, lastRegionLabels[index]);
+            if (nextLabel !== lastRegionLabels[index] && nodes.level) {
+              nodes.level.textContent = nextLabel;
+              lastRegionLabels[index] = nextLabel;
+            }
+            if (lastRegionLevels[index] < 0 || Math.abs(nextLevel - lastRegionLevels[index]) >= 0.0015) {
+              if (nodes.meter) {
+                nodes.meter.style.setProperty("--region-level", String(nextLevel));
+              }
+              lastRegionLevels[index] = nextLevel;
+            }
+          });
+        }
+
+        function applySignal(signalValues) {
+          for (let i = 0; i < signalValues.length; i += 1) {
+            const baseColor = getBaseColor(i);
+            const hot = Math.max(0, Math.min(signalValues[i], 1));
+            const [r, g, b] = palette(hot);
+            const mixRatio = Math.pow(hot, 0.78) * (regionView ? 0.5 : 0.82);
+            colorArray[i * 3] = baseColor[0] * (1 - mixRatio) + (r / 255) * mixRatio;
+            colorArray[i * 3 + 1] = baseColor[1] * (1 - mixRatio) + (g / 255) * mixRatio;
+            colorArray[i * 3 + 2] = baseColor[2] * (1 - mixRatio) + (b / 255) * mixRatio;
+            activityArray[i] = hot;
+          }
+          colorAttribute.needsUpdate = true;
+          activityAttribute.needsUpdate = true;
+        }
+
+        function setActiveSurfaceButton() {
+          surfaceButtons.forEach((button) => {
+            button.classList.toggle("is-active", button.dataset.brainSurface === targetSurfaceKey);
+          });
+        }
+
+        function updateSurfaceMorph() {
+          if (!surfaces[targetSurfaceKey] || targetSurfaceKey === currentSurfaceKey) return;
+          const current = surfaces[currentSurfaceKey];
+          const target = surfaces[targetSurfaceKey];
+          let done = true;
+          for (let i = 0; i < positionArray.length; i += 1) {
+            const nextValue = positionArray[i] + (target[i] - positionArray[i]) * 0.12;
+            if (Math.abs(target[i] - nextValue) > 0.0008) done = false;
+            positionArray[i] = nextValue;
+          }
+          positionAttribute.needsUpdate = true;
+          geometry.computeVertexNormals();
+          if (done) {
+            positionArray.set(target);
+            positionAttribute.needsUpdate = true;
+            geometry.computeVertexNormals();
+            currentSurfaceKey = targetSurfaceKey;
+          }
+        }
+
+        function getFramePair(seconds) {
+          if (frames.length === 1) return { left: frames[0], right: frames[0], ratio: 0 };
+          let rightIndex = frames.findIndex((frame) => frame.seconds >= seconds);
+          if (rightIndex <= 0) return { left: frames[0], right: frames[0], ratio: 0 };
+          if (rightIndex === -1) return { left: frames[frames.length - 1], right: frames[frames.length - 1], ratio: 0 };
+          const left = frames[rightIndex - 1];
+          const right = frames[rightIndex];
+          const span = Math.max(right.seconds - left.seconds, 1e-6);
+          return { left, right, ratio: (seconds - left.seconds) / span };
+        }
+
+        function updateSignalFromTime(seconds) {
+          const pair = getFramePair(seconds);
+          for (let i = 0; i < displayedSignal.length; i += 1) {
+            displayedSignal[i] = pair.left.signal[i] * (1 - pair.ratio) + pair.right.signal[i] * pair.ratio;
+          }
+          applySignal(displayedSignal);
+          if (regionView && regionGrid) {
+            const leftScores = pair.left.regionScores || [];
+            const rightScores = pair.right.regionScores || [];
+            const leftPeakScores = pair.left.regionPeakScores || [];
+            const rightPeakScores = pair.right.regionPeakScores || [];
+            const regionScores = regions.map((_, index) => (
+              Number(leftScores[index] || 0) * (1 - pair.ratio) + Number(rightScores[index] || 0) * pair.ratio
+            ));
+            const regionPeakScores = regions.map((_, index) => (
+              Number(leftPeakScores[index] || 0) * (1 - pair.ratio) + Number(rightPeakScores[index] || 0) * pair.ratio
+            ));
+            updateRegionPanel(regionScores, regionPeakScores);
+          }
+          if (status) {
+            const prefix = status.dataset.statusPrefix || "";
+            status.textContent = `${prefix}: ${pair.left.timestamp}`;
+          }
+        }
+
+        surfaceButtons.forEach((button) => {
+          button.addEventListener("click", () => {
+            targetSurfaceKey = button.dataset.brainSurface || currentSurfaceKey;
+            setActiveSurfaceButton();
+            syncRegionMode();
+          });
+        });
+        setActiveSurfaceButton();
+        syncRegionMode();
+
+        function resize() {
+          const nextWidth = Math.max(stage.clientWidth, compactBrain ? 220 : 320);
+          const nextHeight = Math.max(stage.clientHeight, minStageSize);
+          renderer.setSize(nextWidth, nextHeight);
+          camera.aspect = nextWidth / nextHeight;
+          camera.updateProjectionMatrix();
+        }
+
+        function render() {
+          updateSignalFromTime(Number(video.currentTime || 0));
+          updateSurfaceMorph();
+          if (controls) controls.update();
+          renderer.render(scene, camera);
+          window.requestAnimationFrame(render);
+        }
+
+        window.addEventListener("resize", resize);
+        resize();
+        render();
+      }
+
+      bindFilePicker();
+      bindSubmitProgress();
+      bindThemeToggle();
+      applyTimelineColors();
+      bindDraggableBoards();
+      document.querySelectorAll(".timeline-wrap").forEach(bindTimeline);
+      document.querySelectorAll(".brain-stage[data-brain-scene]").forEach(createBrainScene);
+    })();
+  </script>
+  {% endif %}
+</body>
+</html>

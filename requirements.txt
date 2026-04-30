@@ -1,0 +1,15 @@
+fastapi
+uvicorn[standard]
+python-multipart
+jinja2
+numpy
+pandas
+torch
+matplotlib
+moviepy
+huggingface-hub
+openai-whisper
+
+# Install the official TRIBE v2 package according to the upstream model page:
+# https://huggingface.co/facebook/tribev2
+

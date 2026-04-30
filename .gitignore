@@ -1,0 +1,57 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+*.token
+*.key
+
+# Runtime uploads, generated reports, private media
+runtime_media/*
+!runtime_media/.gitkeep
+*.mp4
+*.mov
+*.mkv
+*.avi
+*.webm
+*.wav
+*.mp3
+*.m4a
+*.pdf
+
+# Model/cache directories
+tribe_cache/
+cache/
+models/
+checkpoints/
+*.ckpt
+*.pt
+*.pth
+*.safetensors
+
+# Logs and temporary debug exports
+*.log
+uvicorn*.log
+deep_test*.html
+tmp/
+temp/
+
+# OS/editor files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+

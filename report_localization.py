@@ -1,0 +1,1289 @@
+from __future__ import annotations
+
+from copy import deepcopy
+from typing import Any
+
+from analysis_settings import ANALYSIS_MODE_PROFILES
+SUPPORTED_REPORT_LANGUAGES = ("en",)
+DEFAULT_REPORT_LANGUAGE = "en"
+
+
+UI_TEXTS: dict[str, dict[str, str]] = {
+    "ru": {
+        "language": "Язык",
+        "report_language": "Язык отчета",
+        "language_ru": "Русский",
+        "language_en": "English",
+        "open_json": "Открыть JSON",
+        "download_pdf": "Скачать PDF",
+        "overall_score": "Общий score",
+        "overall_score_note_single": "Итоговый score по ролику.",
+        "overall_score_note_compare": "Score лидирующей версии.",
+        "mode": "Режим",
+        "format": "Формат",
+        "single_review": "Один ролик",
+        "versions_suffix": "версий",
+        "video_jump_simple": "Видео и быстрый переход",
+        "video_jump": "Видео и jump-to-time",
+        "timeline_simple": "График ролика",
+        "timeline_deep": "TRIBE Timeline",
+        "timeline_hint": "Наведи, чтобы увидеть время. Кликни по графику, чтобы прыгнуть в эту точку ролика.",
+        "timeline_level": "Уровень",
+        "timeline_signal": "Уровень",
+        "avg": "Среднее",
+        "max": "Макс",
+        "min": "Мин",
+        "seconds": "с",
+        "brain_title": "Симуляция активности коры",
+        "brain_status": "Текущее окно",
+        "frames": "Кадров",
+        "brain_activity": "Сила",
+        "brain_hotspots": "Яркие места",
+        "brain_normal": "Обычный",
+        "brain_inflated": "Развернутый",
+        "brain_unavailable": "3D-мозг недоступен для этого прогона.",
+        "what_to_do": "Что сделать с роликом",
+        "what_to_keep_change": "Что оставить и что менять",
+        "strengths": "Сильные стороны",
+        "weaknesses": "Слабые стороны",
+        "next_step": "Следующий шаг",
+        "open_numbers": "Открыть цифры и детали",
+        "open_speech": "Открыть речь и текст",
+        "good_bad": "Что уже хорошо / что мешает",
+        "already_good": "Что уже хорошо",
+        "gets_in_way": "Что мешает",
+        "signal_metrics": "Показатели графика",
+        "windows_phases": "Ключевые окна и фазы",
+        "speech_title": "Речь",
+        "full_text": "Полный текст",
+        "words": "слов",
+        "speech_chunks": "Куски речи",
+        "fix_first": "Что править в первую очередь",
+        "footer_simple": "Это простой режим: он показывает, что в ролике оставить, а что править первым.",
+        "footer_deep": "Этот интерфейс показывает расширенный разбор ролика и отдельный speech/transcript слой.",
+        "compare_summary": "Итог сравнения",
+        "compare_axes": "По каким показателям кто выигрывает",
+        "compare_table": "Compare table",
+        "variant_breakdown": "Разбор по версиям",
+        "winner": "Победитель",
+        "strong_block": "Сильный показатель",
+        "weak_block": "Слабый показатель",
+        "new_run": "Новый прогон",
+        "run_hint": "Загрузи один ролик для полного разбора или сразу 2-5 роликов, чтобы сервис сам сравнил варианты.",
+        "analysis_mode": "Режим отчета",
+        "run_analysis": "Запустить анализ",
+        "choose_files": "Выбрать файлы",
+        "no_files_selected": "Файлы не выбраны",
+    },
+    "en": {
+        "language": "Language",
+        "report_language": "Report language",
+        "language_ru": "Russian",
+        "language_en": "English",
+        "open_json": "Open JSON",
+        "download_pdf": "Download PDF",
+        "overall_score": "Overall score",
+        "overall_score_note_single": "Final score for this cut.",
+        "overall_score_note_compare": "Score of the leading version.",
+        "mode": "Mode",
+        "format": "Format",
+        "single_review": "Single review",
+        "versions_suffix": "versions",
+        "video_jump_simple": "Video and quick jump",
+        "video_jump": "Video and jump-to-time",
+        "timeline_simple": "Creative curve",
+        "timeline_deep": "TRIBE Timeline",
+        "timeline_hint": "Hover to see the time. Click the curve to jump to that point in the video.",
+        "timeline_level": "Level",
+        "timeline_signal": "Level",
+        "avg": "Avg",
+        "max": "Max",
+        "min": "Min",
+        "seconds": "s",
+        "brain_title": "Cortex activity simulation",
+        "brain_status": "Current window",
+        "frames": "Frames",
+        "brain_activity": "Activity",
+        "brain_hotspots": "Hotspots",
+        "brain_normal": "Normal",
+        "brain_inflated": "Inflated",
+        "brain_unavailable": "The 3D brain view is unavailable for this run.",
+        "what_to_do": "What to change in the video",
+        "what_to_keep_change": "What to keep and what to change",
+        "strengths": "What is working",
+        "weaknesses": "What is weak",
+        "next_step": "Next step",
+        "open_numbers": "Timeline parts",
+        "open_speech": "Open speech and text",
+        "good_bad": "What is working / what is hurting",
+        "already_good": "What is working",
+        "gets_in_way": "What is hurting",
+        "signal_metrics": "Curve metrics",
+        "windows_phases": "Key windows and phases",
+        "speech_title": "Speech",
+        "full_text": "Full transcript",
+        "words": "words",
+        "speech_chunks": "Speech segments",
+        "fix_first": "What to fix first",
+        "footer_simple": "Simple mode shows what to keep in the cut and what to fix first.",
+        "footer_deep": "This view shows the full review plus a separate speech/transcript layer.",
+        "compare_summary": "Comparison summary",
+        "compare_axes": "Where each version wins",
+        "compare_table": "Compare table",
+        "variant_breakdown": "Version breakdown",
+        "winner": "Winner",
+        "strong_block": "Strong area",
+        "weak_block": "Weak area",
+        "new_run": "New run",
+        "run_hint": "Upload one video for a full review or 2-5 videos so the app can compare the cuts for you.",
+        "analysis_mode": "Review mode",
+        "run_analysis": "Run analysis",
+        "choose_files": "Choose files",
+        "no_files_selected": "No files selected",
+    },
+}
+
+
+ANALYSIS_MODE_TEXTS: dict[str, dict[str, dict[str, str]]] = {
+    "ru": {
+        "simplified": {
+            "label": "Упрощенный",
+            "description": "Пишет простым языком: что оставить, что поправить и где именно это делать.",
+            "note": "Подходит, когда нужен короткий рабочий вывод без лишней аналитики.",
+            "comparison_note": "Показывает только различия, которые проще всего превратить в следующую правку.",
+        },
+        "deep": {
+            "label": "Глубокий анализ",
+            "description": "Разжевывает максимум деталей: где ролик держится, где проседает и почему.",
+            "note": "Подходит, когда нужен более полный разбор, а не только список правок.",
+            "comparison_note": "Показывает не только лидера, но и за счет каких показателей он выигрывает.",
+        },
+    },
+    "en": {
+        "simplified": {
+            "label": "Simplified",
+            "description": "Uses plain language: what to keep, what to fix, and where to do it.",
+            "note": "Best when you want a short working readout without extra analytics.",
+            "comparison_note": "Shows only the differences that are easiest to turn into the next edit.",
+        },
+        "deep": {
+            "label": "Deep analysis",
+            "description": "Breaks down more detail: where the cut holds, where it drops, and why.",
+            "note": "Best when you want a fuller breakdown instead of only a fix list.",
+            "comparison_note": "Shows not only the leader, but also which areas create the gap.",
+        },
+    },
+}
+
+
+METRIC_LABELS = {
+    "ru": {
+        "Ранний отклик": "Старт графика",
+        "Устойчивость отклика": "Как держится график",
+        "Плотность переходов": "Темп событий",
+        "Стабильность сигнала": "Резкие просадки",
+        "Плотность активации": "Средний уровень",
+        "Старт графика": "Старт графика",
+        "Как держится график": "Как держится график",
+        "Темп событий": "Темп событий",
+        "Резкие просадки": "Резкие просадки",
+        "Средний уровень": "Средний уровень",
+        "Первый кадр": "Хук",
+        "Интерес держится": "Удержание",
+        "Смена кадров": "Темп",
+        "Кадр без лишнего": "Чистота кадра",
+        "Сила картинки": "Сила визуала",
+        "Хук": "Хук",
+        "Удержание": "Удержание",
+        "Пейсинг": "Темп",
+        "Чистота кадра": "Чистота кадра",
+        "Сила визуала": "Сила визуала",
+    },
+    "en": {
+        "Ранний отклик": "Curve start",
+        "Устойчивость отклика": "How the curve holds",
+        "Плотность переходов": "Pace of new events",
+        "Стабильность сигнала": "Sharp drops",
+        "Плотность активации": "Average level",
+        "Старт графика": "Curve start",
+        "Как держится график": "How the curve holds",
+        "Темп событий": "Pace of new events",
+        "Резкие просадки": "Sharp drops",
+        "Средний уровень": "Average level",
+        "Первый кадр": "Hook",
+        "Интерес держится": "Retention",
+        "Смена кадров": "Pacing",
+        "Кадр без лишнего": "Visual Clarity",
+        "Сила картинки": "Visual Punch",
+        "Хук": "Hook",
+        "Удержание": "Retention",
+        "Пейсинг": "Pacing",
+        "Чистота кадра": "Visual Clarity",
+        "Сила визуала": "Visual Punch",
+        "Ранний отклик": "Curve start",
+        "Устойчивость отклика": "How the curve holds",
+        "Плотность переходов": "Pace of new events",
+        "Стабильность сигнала": "Sharp drops",
+        "Плотность активации": "Average level",
+        "Старт графика": "Curve start",
+        "Как держится график": "How the curve holds",
+        "Темп событий": "Pace of new events",
+        "Резкие просадки": "Sharp drops",
+        "Средний уровень": "Average level",
+        "Первый кадр": "Hook",
+        "Интерес держится": "Retention",
+        "Смена кадров": "Pacing",
+        "Кадр без лишнего": "Visual Clarity",
+        "Сила картинки": "Visual Punch",
+        "Хук": "Hook",
+        "Удержание": "Retention",
+        "Пейсинг": "Pacing",
+        "Чистота кадра": "Visual Clarity",
+        "Сила визуала": "Visual Punch",
+        "Hook": "Hook",
+        "Retention": "Retention",
+        "Pacing": "Pacing",
+        "Visual Clarity": "Visual Clarity",
+        "Visual Punch": "Visual Punch",
+    },
+}
+
+
+LABEL_MAP_EN = {
+    "Лучший кусок": "Best section",
+    "Где сократить": "Where to cut",
+    "Где сменить кадр": "Where to change the shot",
+    "Где усилить начало": "Where to strengthen the hook",
+    "Где почистить кадр": "Where to clean up the frame",
+    "Где усилить картинку": "Where to punch up the visual",
+    "Где дать фразу раньше": "Where to bring the line earlier",
+    "Где убрать паузу": "Where to cut the pause",
+    "Оставить как есть": "Keep as is",
+    "Подрежь затянутый отрезок": "Trim the dragged section",
+    "Смени кадр раньше": "Change the shot earlier",
+    "Покажи главное раньше": "Show the main thing earlier",
+    "Убери лишнее из кадра": "Clean up the frame",
+    "Покажи товар крупнее": "Show the product larger",
+    "Скажи главное раньше": "Say the main point earlier",
+    "Убери длинную паузу": "Cut the long pause",
+    "Сделать первым": "Do first",
+    "Сделать потом": "Do next",
+    "Оставить": "Keep",
+    "Сильные стороны": "What is working",
+    "Слабые стороны": "What is weak",
+    "Следующий шаг": "Next step",
+    "Что уже хорошо": "What is working",
+    "Что мешает": "What is hurting",
+    "Подозрительный момент": "Weak spot",
+    "Речь": "Speech",
+    "Когда начинается речь": "Voice enters",
+    "Темп речи": "Delivery speed",
+    "Насколько плотно сказано": "Delivery density",
+    "Сколько пауз": "Pauses",
+    "Насколько хорошо разобралась речь": "Transcript confidence",
+    "Лучший участок": "Best section",
+    "Лучший кусок": "Best section",
+    "Пик сигнала": "Peak",
+    "Сильный момент": "Peak",
+    "Слабое окно": "Weak window",
+    "Слабое место": "Weak window",
+    "Самый резкий переход": "Sharpest transition",
+    "Резкая смена": "Sharpest transition",
+    "Где чинить первым": "Weak window",
+    "Где ускорить": "Where to change the shot",
+    "Где ускорить подачу": "Where to tighten delivery",
+    "Где сократить": "Where to cut",
+    "Сделать первым": "Do first",
+    "Сделать потом": "Do next",
+    "Проверить после правок": "Check after edits",
+    "Оставить": "Keep",
+    "Оставить как есть": "Keep as is",
+    "Сильные стороны": "What is working",
+    "Слабые стороны": "What is weak",
+    "Следующий шаг": "Next step",
+    "Что уже хорошо": "What is working",
+    "Что мешает": "What is hurting",
+    "Подозрительный момент": "Weak spot",
+    "Речь": "Speech",
+    "Когда начинается речь": "Voice enters",
+    "Темп речи": "Delivery speed",
+    "Насколько плотно сказано": "Delivery density",
+    "Сколько пауз": "Pauses",
+    "Сказать главное раньше": "Say the main point earlier",
+    "Подключить речь раньше": "Bring the speech in earlier",
+    "Сожми речь": "Tighten the speech",
+    "Подрежь затянутый отрезок": "Trim the dragged section",
+    "Смени кадр раньше": "Change the shot earlier",
+    "Покажи главное раньше": "Show the main thing earlier",
+    "Убери лишнее из кадра": "Clean up the frame",
+    "Покажи товар крупнее": "Show the product larger",
+    "Убери длинную паузу": "Cut the long pause",
+}
+
+
+def normalize_report_language(language: str | None) -> str:
+    value = (language or DEFAULT_REPORT_LANGUAGE).strip().lower()
+    return value if value in SUPPORTED_REPORT_LANGUAGES else DEFAULT_REPORT_LANGUAGE
+
+
+def get_ui_texts(language: str) -> dict[str, str]:
+    return UI_TEXTS[normalize_report_language(language)]
+
+
+def localize_analysis_mode_options(language: str) -> list[dict[str, str]]:
+    lang = normalize_report_language(language)
+    items: list[dict[str, str]] = []
+    for key, profile in ANALYSIS_MODE_PROFILES.items():
+        text = ANALYSIS_MODE_TEXTS[lang].get(key, {})
+        items.append(
+            {
+                "key": profile.key,
+                "label": text.get("label", profile.label),
+                "short_label": profile.short_label if lang == "ru" else text.get("label", profile.short_label),
+                "description": text.get("description", profile.description),
+            }
+        )
+    return items
+
+
+def localize_report(report: dict[str, Any], language: str) -> dict[str, Any]:
+    lang = normalize_report_language(language)
+    localized = deepcopy(report)
+    _decorate_report_urls(localized, lang)
+    _localize_analysis_mode(localized, lang)
+
+    for variant in _iter_variants(localized):
+        _apply_known_labels(variant, lang)
+
+    if localized.get("mode") == "compare":
+        _apply_known_labels(localized, lang)
+
+    if lang == "en":
+        _rewrite_english_report(localized)
+
+    localized["report_language"] = lang
+    return localized
+
+
+def _decorate_report_urls(report: dict[str, Any], language: str) -> None:
+    report_id = report.get("report_id")
+    if not report_id:
+        return
+    report["report_page_url"] = f"/reports/{report_id}"
+    report["report_url"] = f"/reports/{report_id}.json"
+    report["report_pdf_url"] = f"/reports/{report_id}.pdf"
+
+
+def _localize_analysis_mode(report: dict[str, Any], language: str) -> None:
+    mode = report.get("analysis_mode")
+    if not isinstance(mode, dict):
+        return
+    text = ANALYSIS_MODE_TEXTS[language].get(str(mode.get("key") or ""), {})
+    if text:
+        mode["label"] = text.get("label", mode.get("label"))
+        mode["description"] = text.get("description", mode.get("description"))
+        mode["note"] = text.get("note", mode.get("note"))
+        if "comparison_note" in mode:
+            mode["comparison_note"] = text.get("comparison_note", mode.get("comparison_note"))
+
+
+def _iter_variants(report: dict[str, Any]) -> list[dict[str, Any]]:
+    if report.get("mode") == "compare":
+        return [item for item in report.get("variants", []) if isinstance(item, dict)]
+    return [report]
+
+
+def _apply_known_labels(report: dict[str, Any], language: str) -> None:
+    metric_map = METRIC_LABELS["en" if language == "en" else "ru"]
+
+    for metric in report.get("metrics", []):
+        if isinstance(metric, dict):
+            label = str(metric.get("label") or "")
+            metric["label"] = metric_map.get(label, label)
+
+    for row in report.get("comparison_rows", []):
+        if isinstance(row, dict):
+            label = str(row.get("label") or "")
+            row["label"] = metric_map.get(label, label)
+
+    for item in report.get("focus_windows", []):
+        if isinstance(item, dict) and language == "en":
+            label = str(item.get("label") or "")
+            item["label"] = LABEL_MAP_EN.get(label, label)
+
+    for item in report.get("action_items", []):
+        if isinstance(item, dict) and language == "en":
+            title = str(item.get("title") or "")
+            item["title"] = LABEL_MAP_EN.get(title, title)
+
+    for item in report.get("recommendation_plan", []):
+        if isinstance(item, dict):
+            title = str(item.get("title") or "")
+            if language == "en":
+                item["title"] = LABEL_MAP_EN.get(title, title)
+
+    speech = report.get("speech")
+    if isinstance(speech, dict):
+        if language == "en" and speech.get("title"):
+            speech["title"] = LABEL_MAP_EN.get(str(speech["title"]), str(speech["title"]))
+        for metric in speech.get("metrics", []):
+            if isinstance(metric, dict) and language == "en":
+                label = str(metric.get("label") or "")
+                metric["label"] = LABEL_MAP_EN.get(label, label)
+
+    if language == "en":
+        for item in report.get("seek_targets", []):
+            if isinstance(item, dict):
+                label = str(item.get("label") or "")
+                item["label"] = LABEL_MAP_EN.get(label, label)
+        for item in report.get("ranking", []):
+            if isinstance(item, dict):
+                for key in ("strongest", "weakest"):
+                    label = str(item.get(key) or "")
+                    item[key] = metric_map.get(label, label)
+        for item in report.get("axis_winners", []):
+            if isinstance(item, dict):
+                label = str(item.get("label") or "")
+                item["label"] = metric_map.get(label, label)
+
+
+def _rewrite_english_report(report: dict[str, Any]) -> None:
+    if report.get("mode") == "compare":
+        for variant in report.get("variants", []):
+            if isinstance(variant, dict):
+                _rewrite_english_single_report(variant)
+        _rewrite_english_compare_report(report)
+        return
+    _rewrite_english_single_report(report)
+
+
+def _rewrite_english_single_report(report: dict[str, Any]) -> None:
+    analysis_mode = str((report.get("analysis_mode") or {}).get("key") or "")
+    metrics = _ordered_metrics(report)
+    _rewrite_metric_summaries_en(report)
+    _rewrite_drop_moments_en(report)
+    _rewrite_speech_en(report)
+    _rewrite_brain_simulation_en(report)
+
+    if analysis_mode == "simplified":
+        actions = _build_native_english_actions(report, metrics)
+        report["action_items"] = actions
+        _rewrite_focus_windows_en(report, metrics, simplified=True)
+        report["seek_targets"] = _build_seek_targets_en(report)
+        report["strengths"] = _build_strengths_en(report, metrics, actions, simplified=True)
+        report["weaknesses"] = _build_weaknesses_en(report, metrics, actions, simplified=True)
+        report["recommendation_plan"] = _build_plan_en(actions, simplified=True)
+        report["recommendations"] = _build_recommendations_en(report, metrics, simplified=True)
+        verdict, executive, banner = _build_single_header_en(report, metrics, actions, simplified=True)
+        report["verdict"] = verdict
+        report["executive_summary"] = executive
+        report["product_summary"] = banner
+        report["signal_note"] = "Below is a simple read of where the cut looks stronger and where it weakens."
+        report["copy_rewrite"] = {"provider": "native_en"}
+        return
+
+    actions = _rewrite_action_items_en(report, metrics)
+    if actions:
+        report["action_items"] = actions
+    _rewrite_focus_windows_en(report, metrics, simplified=False)
+    report["seek_targets"] = _build_seek_targets_en(report)
+    report["phase_notes"] = _build_phase_notes_en(report)
+    report["strengths"] = _build_strengths_en(report, metrics, None, simplified=False)
+    report["weaknesses"] = _build_weaknesses_en(report, metrics, None, simplified=False)
+    report["recommendations"] = _build_recommendations_en(report, metrics, simplified=False)
+    report["recommendation_plan"] = _build_plan_en(report.get("recommendations"), simplified=False)
+    verdict, executive, banner = _build_single_header_en(report, metrics, actions, simplified=False)
+    report["verdict"] = verdict
+    report["executive_summary"] = executive
+    report["product_summary"] = banner
+    report["signal_note"] = "This is a practical read of the curve: where it rises, where it drops, and what to test next."
+
+
+def _rewrite_english_compare_report(report: dict[str, Any]) -> None:
+    ranking = [item for item in report.get("ranking", []) if isinstance(item, dict)]
+    if not ranking:
+        return
+
+    best = ranking[0]
+    runner_up = ranking[1] if len(ranking) > 1 else ranking[0]
+    delta = int(best.get("overall_score") or 0) - int(runner_up.get("overall_score") or 0)
+    top_axes = [str(item.get("label") or "") for item in report.get("axis_winners", []) if isinstance(item, dict)][:2]
+    report["title"] = f"Comparison of {report.get('variant_count', len(ranking))} versions"
+    report["verdict"] = _build_compare_verdict_en(best, runner_up, delta)
+    report["executive_summary"] = _build_compare_executive_summary_en(best, runner_up, delta, top_axes)
+    report["common_gaps"] = _build_common_gaps_en(report)
+    report["product_summary"] = _build_compare_banner_en(best, report["common_gaps"])
+    report["recommendations"] = _build_compare_recommendations_en(best, report["common_gaps"])
+    report["signal_note"] = "Every version is judged on the same curve. The winner is the cut with the stronger start, higher average level, and fewer sharp drops."
+
+    for item in ranking:
+        strongest = str(item.get("strongest") or "")
+        weakest = str(item.get("weakest") or "")
+        item_delta = int(best.get("overall_score") or 0) - int(item.get("overall_score") or 0)
+        if item_delta == 0:
+            item["summary"] = f"Current leader. It wins mostly on {strongest} and avoids the largest drops seen in the other versions."
+        elif item_delta <= 6:
+            item["summary"] = f"Close to the leader. The main drag is {weakest}."
+        else:
+            item["summary"] = f"Noticeably behind the leader. Its best area is {strongest}, but {weakest} pulls the total down."
+
+    for item in report.get("axis_winners", []):
+        if isinstance(item, dict):
+            item["summary"] = f"{item.get('winner_name', 'This cut')} has the clearest edge on {item.get('label', 'this area')}."
+
+
+def _rewrite_metric_summaries_en(report: dict[str, Any]) -> None:
+    for metric in report.get("metrics", []):
+        if not isinstance(metric, dict):
+            continue
+        key = str(metric.get("key") or "")
+        score = int(metric.get("score") or 0)
+        metric["summary"] = _metric_summary_en(key, score)
+
+
+def _rewrite_drop_moments_en(report: dict[str, Any]) -> None:
+    for item in report.get("drop_moments", []):
+        if isinstance(item, dict):
+            item["reason"] = "This is where the cut loses energy."
+
+
+def _rewrite_speech_en(report: dict[str, Any]) -> None:
+    speech = report.get("speech")
+    if not isinstance(speech, dict):
+        return
+
+    speech["title"] = "Speech"
+    if speech.get("available"):
+        speech["note"] = "This is the separate Whisper transcript layer. Use it to inspect timing, pauses, and wording next to the curve."
+    else:
+        original_message = str(speech.get("message") or "").strip()
+        if ":" in original_message and ("Транскрипция" in original_message or "не поднялась" in original_message):
+            reason = original_message.split(":", 1)[1].strip()
+            speech["message"] = f"Transcript startup failed: {reason}"
+        else:
+            speech["message"] = "No reliable speech was detected for this run."
+        speech["note"] = "This is the separate Whisper transcript layer. It helps inspect timing and delivery, but it is separate from the curve."
+
+    for metric in speech.get("metrics", []):
+        if not isinstance(metric, dict):
+            continue
+        key = str(metric.get("key") or "")
+        metric["label"] = _speech_metric_label_en(key, str(metric.get("label") or ""))
+        metric["summary"] = _speech_metric_summary_en(key, metric.get("value"))
+
+
+def _rewrite_brain_simulation_en(report: dict[str, Any]) -> None:
+    brain = report.get("brain_simulation")
+    if not isinstance(brain, dict):
+        return
+    if brain.get("available"):
+        brain["message"] = "Rotate the gray 3D model with the mouse. Bright hotspots show where the cut is landing stronger right now."
+
+
+def _ordered_metrics(report: dict[str, Any]) -> list[dict[str, Any]]:
+    metrics = report.get("metrics")
+    if not isinstance(metrics, list):
+        return []
+    collected: list[dict[str, Any]] = []
+    for item in metrics:
+        if not isinstance(item, dict):
+            continue
+        key = str(item.get("key") or "").strip()
+        if not key:
+            continue
+        collected.append(
+            {
+                "key": key,
+                "label": str(item.get("label") or "").strip(),
+                "score": int(item.get("score") or 0),
+            }
+        )
+    return sorted(collected, key=lambda metric: metric["score"], reverse=True)
+
+
+def _metric_summary_en(metric_key: str, score: int) -> str:
+    bucket = "high" if score >= 75 else "mid" if score >= 60 else "low"
+    library = {
+        "early_response": {
+            "high": "The main thing is clear from the first shot.",
+            "mid": "The opening is okay, but the main subject could appear earlier and bigger.",
+            "low": "The hook is weak. The main thing shows up too late or is not clear enough right away.",
+        },
+        "sustain": {
+            "high": "The cut keeps introducing enough change to hold attention.",
+            "mid": "Retention is uneven. Some sections sit too long without anything new.",
+            "low": "There are sections with no new action or no new visual, so the cut feels skippable.",
+        },
+        "transition": {
+            "high": "The shots change at the right time.",
+            "mid": "The pacing is workable, but some shots hang a little too long.",
+            "low": "The shots change too late, so the cut starts to drag.",
+        },
+        "stability": {
+            "high": "The frame is easy to read. One main subject wins the attention quickly.",
+            "mid": "Some frames feel crowded with extra objects, small text, or a noisy background.",
+            "low": "Too many elements compete inside the frame, so the main point gets lost.",
+        },
+        "density": {
+            "high": "The visual is strong: the subject reads well, motion is visible, and contrast holds.",
+            "mid": "The visual is fine, but the subject gets small, motion is limited, or contrast is weak.",
+            "low": "The visual feels weak: not enough scale, motion, or contrast to really pull the eye.",
+        },
+    }
+    return library.get(metric_key, {}).get(bucket, "")
+
+
+def _native_action_library_en(metric_key: str) -> dict[str, str]:
+    library = {
+        "early_response": {
+            "title": "Show the main thing earlier",
+            "instruction": "Show the main thing in the first shot, cut the long setup, and land the key line earlier.",
+            "keep": "Keep this opening as a reference. The main thing reads fast here.",
+            "focus_label": "Where to strengthen the hook",
+            "focus_summary": "Show the main thing earlier and cut the long setup.",
+        },
+        "sustain": {
+            "title": "Cut this section",
+            "instruction": "Cut this section, trim the pause, or change the shot earlier.",
+            "keep": "Keep this section as a reference. The pace already holds here.",
+            "focus_label": "Where to cut",
+            "focus_summary": "Cut this section or change the shot earlier.",
+        },
+        "transition": {
+            "title": "Change the shot earlier",
+            "instruction": "Change the shot earlier, trim the hanging shot, or add another angle.",
+            "keep": "Keep this shot pace as a reference. It already works.",
+            "focus_label": "Where to change the shot",
+            "focus_summary": "Change the shot earlier or trim part of the setup.",
+        },
+        "stability": {
+            "title": "Clean up the frame",
+            "instruction": "Remove extra text or background clutter and leave one main subject in the frame.",
+            "keep": "Keep this frame as a reference. The main point is easy to read here.",
+            "focus_label": "Where to clean up the frame",
+            "focus_summary": "Remove the extra elements and leave one clear focus.",
+        },
+        "density": {
+            "title": "Make the visual stronger",
+            "instruction": "Show the subject bigger, add motion, or push the contrast.",
+            "keep": "Keep this scale and contrast as a reference. This section looks stronger than the rest.",
+            "focus_label": "Where to punch up the visual",
+            "focus_summary": "Show the subject bigger or add more visible motion.",
+        },
+        "speech_start": {
+            "title": "Say the main line earlier",
+            "instruction": "Bring the main line earlier or cut the silent setup.",
+            "keep": "",
+            "focus_label": "Where to bring the line earlier",
+            "focus_summary": "Bring the main line earlier and trim the silent setup.",
+        },
+        "pause": {
+            "title": "Cut the long pause",
+            "instruction": "Trim the pause between lines or tighten the delivery.",
+            "keep": "",
+            "focus_label": "Where to cut the pause",
+            "focus_summary": "Trim the pause or tighten the delivery.",
+        },
+    }
+    return library.get(metric_key, library["sustain"])
+
+
+def _build_native_english_actions(report: dict[str, Any], metrics: list[dict[str, Any]]) -> list[dict[str, str]]:
+    strongest = metrics[0] if metrics else {"key": "sustain"}
+    weakest = metrics[-1] if metrics else {"key": "sustain"}
+    runner = metrics[-2] if len(metrics) > 1 else weakest
+    windows = [item for item in report.get("focus_windows", []) if isinstance(item, dict)]
+    best_window = windows[0] if windows else None
+    weak_window = windows[1] if len(windows) > 1 else None
+    dynamic_window = windows[2] if len(windows) > 2 else None
+
+    items: list[dict[str, str]] = []
+    if weak_window and weak_window.get("timestamp"):
+        items.append(_make_action_item_en(str(weak_window["timestamp"]), str(weakest["key"])))
+    if best_window and best_window.get("timestamp"):
+        items.append(_make_keep_item_en(str(best_window["timestamp"]), str(strongest["key"])))
+    if dynamic_window and dynamic_window.get("timestamp"):
+        items.append(_make_action_item_en(str(dynamic_window["timestamp"]), "transition"))
+
+    for moment in report.get("drop_moments", []):
+        if isinstance(moment, dict) and moment.get("timestamp"):
+            items.append(_make_action_item_en(str(moment["timestamp"]), str(runner["key"])))
+
+    speech = report.get("speech")
+    if isinstance(speech, dict) and speech.get("available"):
+        speech_start = speech.get("speech_start_seconds")
+        if isinstance(speech_start, (int, float)) and float(speech_start) > 2.0:
+            items.append(_make_action_item_en(_format_seconds_for_copy(float(speech_start)), "speech_start"))
+        pause_ratio = speech.get("pause_ratio")
+        if isinstance(pause_ratio, (int, float)) and float(pause_ratio) > 0.28:
+            fallback_ts = _fallback_action_timestamp(report)
+            if fallback_ts:
+                items.append(_make_action_item_en(fallback_ts, "pause"))
+
+    deduped: list[dict[str, str]] = []
+    seen: set[tuple[str, str]] = set()
+    for item in items:
+        key = (item["timestamp"], item["title"])
+        if key in seen or not item["timestamp"]:
+            continue
+        seen.add(key)
+        deduped.append(item)
+    return deduped[:4]
+
+
+def _make_action_item_en(timestamp: str, metric_key: str) -> dict[str, str]:
+    action = _native_action_library_en(metric_key)
+    return {"timestamp": timestamp, "title": action["title"], "instruction": action["instruction"], "why": ""}
+
+
+def _make_keep_item_en(timestamp: str, metric_key: str) -> dict[str, str]:
+    action = _native_action_library_en(metric_key)
+    instruction = action["keep"] or "Keep this section as a reference. It already works."
+    return {"timestamp": timestamp, "title": "Keep as is", "instruction": instruction, "why": ""}
+
+
+def _rewrite_action_items_en(report: dict[str, Any], metrics: list[dict[str, Any]]) -> list[dict[str, str]]:
+    source = report.get("action_items")
+    if not isinstance(source, list):
+        return []
+
+    fallback_keys = [str(metric.get("key") or "sustain") for metric in reversed(metrics)] or ["sustain"]
+    usage: dict[str, int] = {}
+    rewritten: list[dict[str, str]] = []
+    for index, item in enumerate(source):
+        if not isinstance(item, dict):
+            continue
+        timestamp = str(item.get("timestamp") or "").strip()
+        if not timestamp:
+            continue
+        metric_key = _infer_action_metric_key_en(item) or fallback_keys[min(index, len(fallback_keys) - 1)]
+        variant_index = usage.get(metric_key, 0)
+        usage[metric_key] = variant_index + 1
+        action = _native_action_variant_en(metric_key, variant_index)
+        rewritten.append(
+            {
+                "timestamp": timestamp,
+                "title": action["title"],
+                "instruction": action["instruction"],
+                "why": "",
+            }
+        )
+    return rewritten[:6]
+
+
+def _infer_action_metric_key_en(item: dict[str, Any]) -> str | None:
+    text = " ".join(
+        str(item.get(key) or "")
+        for key in ("title", "instruction", "why")
+    ).lower()
+    checks = [
+        ("early_response", ("main thing earlier", "show the main", "hook", "главное раньше", "подводк", "заход", "первый кадр", "усиль старт", "старт", "результат раньше")),
+        ("sustain", ("dragged", "cut this section", "trim this section", "затянут", "не провисал", "темп плотнее", "провис", "середин", "повтор", "payoff")),
+        ("transition", ("change the shot", "shot earlier", "visual accent", "кадр раньше", "визуальный акцент", "план", "ракурс", "событие", "смен")),
+        ("stability", ("clean up the frame", "frame clearer", "clutter", "лишнее", "фокус", "композици", "просадк", "объект от фона", "центр внимания")),
+        ("density", ("product larger", "visual stronger", "visual punch", "крупнее", "контраст", "товар", "картин", "средний уровень", "визуальный", "пользу видимой")),
+        ("speech_start", ("main line", "say the main", "фраз", "речь раньше")),
+        ("pause", ("pause", "пауза", "промежуток")),
+    ]
+    for key, needles in checks:
+        if any(needle in text for needle in needles):
+            return key
+    return None
+
+
+def _native_action_variant_en(metric_key: str, variant_index: int) -> dict[str, str]:
+    variants = {
+        "early_response": [
+            {"title": "Show the main thing earlier", "instruction": "Move the main shot or offer closer to this point. Remove the long setup before it."},
+            {"title": "Start with the result", "instruction": "Put a frame before this point where the viewer immediately understands the payoff."},
+            {"title": "Cut the setup", "instruction": "If this section has an intro before the action, remove it and start closer to the useful moment."},
+            {"title": "Strengthen the first shot", "instruction": "Open with the subject, result, or conflict instead of a neutral lead-in."},
+            {"title": "Bring the subject forward", "instruction": "Make the main subject larger or closer to center before the weak point."},
+            {"title": "Start with action", "instruction": "Replace a calm entry with motion, a gesture, or a visible change."},
+            {"title": "Move a stronger frame up", "instruction": "Take the nearest stronger frame after the dip and test it earlier."},
+            {"title": "Shorten the empty start", "instruction": "Remove frames where the viewer still does not know what to watch."},
+            {"title": "Make the context immediate", "instruction": "Add a short visual cue so the point is clear before the weak section."},
+            {"title": "Make the entry sharper", "instruction": "Use less pause, a larger subject, and a clearer action in the first seconds."},
+        ],
+        "sustain": [
+            {"title": "Trim the slow section", "instruction": "Remove 1-2 seconds before this point or move to the next action faster."},
+            {"title": "Add a new beat", "instruction": "Before this point, add a new detail, movement, or shot change so the cut does not sag."},
+            {"title": "Tighten the pace", "instruction": "Compress the pause and keep only frames that move the scene forward."},
+            {"title": "Refresh the middle", "instruction": "Add a new piece of information here: reaction, detail, result, or changed action."},
+            {"title": "Cut the repeat", "instruction": "If the shot repeats an idea that is already clear, keep only the strongest part."},
+            {"title": "Change shot size", "instruction": "Before the dip, switch scale: close-up, wide shot, or detail."},
+            {"title": "Add a small payoff", "instruction": "Show a quick mini-result before the curve starts to fall."},
+            {"title": "Move the event closer", "instruction": "If the important action happens later, test it 1-2 seconds earlier."},
+            {"title": "Remove the neutral shot", "instruction": "Replace a frame with no new information with movement or reaction."},
+            {"title": "Break the long shot", "instruction": "Split a static section with a quick angle change or detail insert."},
+        ],
+        "transition": [
+            {"title": "Change the shot earlier", "instruction": "Change the shot, angle, or action earlier so this section does not drag."},
+            {"title": "Add a visual accent", "instruction": "Before this point, add movement, a gesture, a push-in, or a change in shot size."},
+            {"title": "Remove the hanging shot", "instruction": "If the frame sits without new action, cut it down to the first clear movement."},
+            {"title": "Insert a detail", "instruction": "Add a short close-up that gives the viewer something new to read."},
+            {"title": "Change the angle", "instruction": "Keep the same action but show it from another angle before the dip."},
+            {"title": "Add a reaction", "instruction": "Insert a reaction or consequence if the scene has a person, animal, or active object."},
+            {"title": "Speed up the edit", "instruction": "Test a shorter version of this shot without changing the meaning."},
+            {"title": "Make the transition clearer", "instruction": "Use motion or action matching so the change feels intentional, not random."},
+            {"title": "Split the repetitive section", "instruction": "Turn a long fragment into two visual phases: before and after, setup and result."},
+            {"title": "Add a text cue", "instruction": "If the image repeats itself, add a short caption with new information."},
+        ],
+        "stability": [
+            {"title": "Clean up the frame", "instruction": "Keep one main subject and remove extra details or text around it."},
+            {"title": "Make the focus clearer", "instruction": "Make the main subject easier to read through size, position, or a cleaner background."},
+            {"title": "Reduce visual clutter", "instruction": "Remove competing elements so the viewer's eye does not split between details."},
+            {"title": "Hide extra text", "instruction": "If there are too many words near the subject, keep one short caption or remove it."},
+            {"title": "Enlarge the subject", "instruction": "Make the important object bigger so it does not compete with the background."},
+            {"title": "Clean the background", "instruction": "Test the frame without distracting objects, glare, or busy details behind the action."},
+            {"title": "Clarify the motion", "instruction": "If the action is too small, show it closer or from a more readable angle."},
+            {"title": "Remove the second focal point", "instruction": "Keep one main focus and darken, crop, or delay the secondary object."},
+            {"title": "Calm the camera", "instruction": "If the dip sits near shake or a sudden move, test a steadier fragment."},
+            {"title": "Separate subject and background", "instruction": "Use light, color, or framing so the main thing does not blend in."},
+        ],
+        "density": [
+            {"title": "Show the product larger", "instruction": "Make the object bigger, strengthen the motion in frame, or add contrast."},
+            {"title": "Increase the visual punch", "instruction": "Before this point, add a brighter frame, a close-up, or a more visible action."},
+            {"title": "Make the frame more contrasty", "instruction": "Separate the main subject from the background with light, color, or cleaner composition."},
+            {"title": "Raise the average level", "instruction": "Improve the ordinary frames around this point, not only the best peak."},
+            {"title": "Add motion", "instruction": "If the frame is static, test hand, camera, object, or position movement."},
+            {"title": "Show a closer detail", "instruction": "Insert a close-up of the detail the viewer should notice."},
+            {"title": "Replace the flat frame", "instruction": "Swap a neutral fragment for a shot with clearer action or emotion."},
+            {"title": "Make the benefit visible", "instruction": "If the product or result is hard to read, show its effect directly in frame."},
+            {"title": "Add visual contrast", "instruction": "Try a brighter subject on a darker background, color accent, or cleaner composition."},
+            {"title": "Tighten the scene", "instruction": "Remove weak in-between frames and keep the shots where subject, action, and point are clear."},
+        ],
+        "speech_start": [
+            {"title": "Say the main line earlier", "instruction": "Move the key line before this point or cut the silent lead-in."},
+            {"title": "Move the line forward", "instruction": "Place the key spoken line closer to the start of the weak section."},
+            {"title": "Open with a short line", "instruction": "Add one clear sentence before the dip, without a long explanation."},
+            {"title": "Cut the silent lead-in", "instruction": "If silent first seconds do not work, shorten them or place the key thought over them."},
+            {"title": "Match line and frame", "instruction": "Let the important phrase happen when the main subject is already visible."},
+        ],
+        "pause": [
+            {"title": "Cut the pause", "instruction": "Trim the empty gap or deliver the phrase more tightly so the section does not dip."},
+            {"title": "Tighten the speech", "instruction": "Shorten the pause between words and keep only the needed phrase."},
+            {"title": "Tighten the delivery", "instruction": "Make the line shorter and closer to the action in frame."},
+            {"title": "Cover the empty gap", "instruction": "If the pause must stay, cover it with action, reaction, or a close-up."},
+            {"title": "Split the long line", "instruction": "Break the speech into shorter chunks and place each one near the matching shot."},
+        ],
+    }
+    options = variants.get(metric_key) or variants["sustain"]
+    return options[variant_index % len(options)]
+
+
+def _rewrite_focus_windows_en(report: dict[str, Any], metrics: list[dict[str, Any]], simplified: bool) -> None:
+    windows = report.get("focus_windows")
+    if not isinstance(windows, list):
+        return
+
+    if simplified:
+        strongest = metrics[0]["key"] if metrics else "sustain"
+        weakest = metrics[-1]["key"] if metrics else "sustain"
+        if len(windows) >= 1 and isinstance(windows[0], dict):
+            windows[0]["label"] = "Best section"
+            windows[0]["summary"] = _native_action_library_en(strongest)["keep"] or "Keep this section as a reference."
+        if len(windows) >= 2 and isinstance(windows[1], dict):
+            weak_action = _native_action_library_en(weakest)
+            windows[1]["label"] = weak_action["focus_label"]
+            windows[1]["summary"] = weak_action["focus_summary"]
+        if len(windows) >= 3 and isinstance(windows[2], dict):
+            transition_action = _native_action_library_en("transition")
+            windows[2]["label"] = transition_action["focus_label"]
+            windows[2]["summary"] = transition_action["focus_summary"]
+        return
+
+    label_map = {
+        "Пик сигнала": "Peak",
+        "Сильный момент": "Peak",
+        "Слабое окно": "Weak window",
+        "Слабое место": "Weak window",
+        "Самый резкий переход": "Sharpest transition",
+        "Резкая смена": "Sharpest transition",
+        "Лучший участок": "Best section",
+        "Лучший участок": "Best section",
+        "Лучший кусок": "Best section",
+        "Где чинить первым": "Weak window",
+        "Где сменить кадр": "Where to change the shot",
+    }
+    summary_map = {
+        "Peak": "This is where the curve is strongest.",
+        "Best section": "This is the section the curve likes most.",
+        "Weak window": "This is where the curve drops the most.",
+        "Sharpest transition": "This is where the cut changes state most sharply.",
+        "Where to change the shot": "This is where an earlier shot change may help.",
+    }
+    for item in windows:
+        if not isinstance(item, dict):
+            continue
+        label = str(item.get("label") or "")
+        item["label"] = label_map.get(label, label)
+        item["summary"] = summary_map.get(str(item.get("label") or ""), "Marked section on the curve.")
+
+
+def _build_seek_targets_en(report: dict[str, Any]) -> list[dict[str, Any]]:
+    targets: list[dict[str, Any]] = []
+    for item in report.get("focus_windows", []):
+        if isinstance(item, dict):
+            targets.append(
+                {
+                    "label": str(item.get("label") or ""),
+                    "timestamp": str(item.get("timestamp") or ""),
+                    "seconds": item.get("seconds"),
+                    "kind": "focus",
+                    "summary": str(item.get("summary") or ""),
+                }
+            )
+    for item in report.get("drop_moments", []):
+        if isinstance(item, dict):
+            targets.append(
+                {
+                    "label": "Weak spot",
+                    "timestamp": str(item.get("timestamp") or ""),
+                    "seconds": item.get("seconds"),
+                    "kind": "drop",
+                    "summary": str(item.get("reason") or ""),
+                }
+            )
+    speech = report.get("speech")
+    if isinstance(speech, dict):
+        for segment in speech.get("segments", [])[:6]:
+            if isinstance(segment, dict):
+                targets.append(
+                    {
+                        "label": "Speech segment",
+                        "timestamp": _format_seconds_for_copy(float(segment.get("start") or 0)),
+                        "seconds": segment.get("start"),
+                        "kind": "speech",
+                        "summary": str(segment.get("text") or ""),
+                    }
+                )
+    return targets
+
+
+def _build_strengths_en(
+    report: dict[str, Any],
+    metrics: list[dict[str, Any]],
+    actions: list[dict[str, str]] | None,
+    simplified: bool,
+) -> list[str]:
+    if simplified:
+        keep_item = next((item for item in actions or [] if item.get("title") == "Keep as is"), None)
+        strongest = metrics[0]["key"] if metrics else "sustain"
+        items: list[str] = []
+        if keep_item and keep_item.get("timestamp"):
+            items.append(f"{keep_item['timestamp']}: {keep_item['instruction']}")
+        if strongest == "early_response":
+            items.append("Keep the fast opening. Do not slow it down with extra setup.")
+        elif strongest == "transition":
+            items.append("Keep the shot rhythm in the strong sections. It already helps the cut move.")
+        else:
+            items.append("Do not over-fix the strong sections. Use their pace and presentation as the reference.")
+        return items[:2]
+
+    speech = report.get("speech") if isinstance(report.get("speech"), dict) else {}
+    items = []
+    if metrics:
+        items.append(f"The strongest area right now is {metrics[0]['label']}: {_metric_summary_en(str(metrics[0]['key']), int(metrics[0]['score']))}")
+    if len(metrics) > 1:
+        items.append(f"Second strongest is {metrics[1]['label']}: {_metric_summary_en(str(metrics[1]['key']), int(metrics[1]['score']))}")
+    if speech.get("available"):
+        items.append("The transcript is stable enough to inspect wording, pauses, and timing next to the curve.")
+    return items[:3]
+
+
+def _build_weaknesses_en(
+    report: dict[str, Any],
+    metrics: list[dict[str, Any]],
+    actions: list[dict[str, str]] | None,
+    simplified: bool,
+) -> list[str]:
+    if simplified:
+        edit_items = [item for item in actions or [] if item.get("title") != "Keep as is"]
+        return [f"{item['timestamp']}: {item['instruction']}" for item in edit_items[:2] if item.get("timestamp")]
+
+    speech = report.get("speech") if isinstance(report.get("speech"), dict) else {}
+    items = []
+    if metrics:
+        weakest = metrics[-1]
+        items.append(f"The main gap right now is {weakest['label']}: {_metric_summary_en(str(weakest['key']), int(weakest['score']))}")
+    if len(metrics) > 1:
+        second = metrics[-2]
+        items.append(f"Check {second['label']} next. That is the next clean place to improve the cut.")
+    speech_start = speech.get("speech_start_seconds")
+    if speech.get("available") and isinstance(speech_start, (int, float)) and float(speech_start) > 2.0:
+        items.append("The spoken line enters late, so the opening has to carry the message without verbal support.")
+    return items[:3]
+
+
+def _build_plan_en(source: Any, simplified: bool) -> list[dict[str, str]]:
+    if simplified:
+        actions = [item for item in source or [] if isinstance(item, dict)]
+        keep_item = next((item for item in actions if item.get("title") == "Keep as is"), None)
+        edit_items = [item for item in actions if item.get("title") != "Keep as is"]
+        plan: list[dict[str, str]] = []
+        if keep_item:
+            plan.append({"title": "Keep", "detail": f"{keep_item['timestamp']}: {keep_item['instruction']}"})
+        if edit_items:
+            plan.append({"title": "Do first", "detail": f"{edit_items[0]['timestamp']}: {edit_items[0]['instruction']}"})
+        if len(edit_items) > 1:
+            plan.append({"title": "Do next", "detail": f"{edit_items[1]['timestamp']}: {edit_items[1]['instruction']}"})
+        return plan[:3]
+
+    recommendations = [item for item in source or [] if isinstance(item, str) and item.strip()]
+    plan: list[dict[str, str]] = []
+    if recommendations:
+        plan.append({"title": "Keep", "detail": "Protect the strongest parts of the current cut while you test the weak spots."})
+        plan.append({"title": "Test first", "detail": recommendations[0]})
+    if len(recommendations) > 1:
+        plan.append({"title": "Check next", "detail": recommendations[1]})
+    return plan[:3]
+
+
+def _build_recommendations_en(report: dict[str, Any], metrics: list[dict[str, Any]], simplified: bool) -> list[str]:
+    scores = {str(item["key"]): int(item["score"]) for item in metrics}
+    drop_moments = [item for item in report.get("drop_moments", []) if isinstance(item, dict)]
+    speech = report.get("speech") if isinstance(report.get("speech"), dict) else {}
+    duration_seconds = float((report.get("video") or {}).get("duration_seconds") or 0.0)
+    cutoff = 60 if simplified else ANALYSIS_MODE_PROFILES.get("deep", ANALYSIS_MODE_PROFILES["simplified"]).recommendation_cutoff
+
+    recs: list[str] = []
+    if scores.get("early_response", 0) < cutoff:
+        recs.append("Strengthen the hook: show the main thing earlier, cut the long setup, and make the first shot easier to read.")
+    if scores.get("sustain", 0) < cutoff:
+        recs.append("Find the weak section and cut it, or change the shot, angle, or action earlier.")
+    if scores.get("transition", 0) < cutoff:
+        recs.append("Change the picture more often: new shot, new angle, new action, or short on-screen text.")
+    if scores.get("stability", 0) < cutoff:
+        recs.append("Simplify the frame: keep one main subject and remove extra text or clutter.")
+    if scores.get("density", 0) < cutoff:
+        recs.append("Punch up the visual: bigger subject, cleaner background, more motion, or stronger contrast.")
+    if drop_moments:
+        timestamps = ", ".join(str(item.get("timestamp") or "") for item in drop_moments[:3] if item.get("timestamp"))
+        if timestamps:
+            recs.append(f"Start with {timestamps} and check the shot, on-screen text, and pace there.")
+    if speech.get("available"):
+        speech_start = speech.get("speech_start_seconds")
+        if isinstance(speech_start, (int, float)) and float(speech_start) > 2.0:
+            recs.append("Bring the main line in earlier if the words carry the key message.")
+        pause_ratio = speech.get("pause_ratio")
+        if isinstance(pause_ratio, (int, float)) and float(pause_ratio) > 0.28:
+            recs.append("Trim the pauses between lines or tighten the delivery.")
+    else:
+        recs.append("If the spoken line matters, recheck voice level, noise, and clarity.")
+    if duration_seconds > 30:
+        recs.append("After the main fixes, test a shorter cut too.")
+    return recs[:6]
+
+
+def _build_single_header_en(
+    report: dict[str, Any],
+    metrics: list[dict[str, Any]],
+    actions: list[dict[str, str]] | None,
+    simplified: bool,
+) -> tuple[str, str, str]:
+    score = int(report.get("overall_score") or 0)
+    scores = {str(item["key"]): int(item["score"]) for item in metrics}
+
+    if simplified:
+        keep_item = next((item for item in actions or [] if item.get("title") == "Keep as is"), None)
+        edit_items = [item for item in actions or [] if item.get("title") != "Keep as is"]
+        verdict = _overall_status_en(score)
+        executive = _simple_overview_text_en(scores, len(edit_items))
+        banner = _simple_banner_text_en(scores, keep_item is not None, len(edit_items))
+        return verdict, executive, banner
+
+    strongest = metrics[0]["label"] if metrics else "Hook"
+    weakest = metrics[-1]["label"] if metrics else "Retention"
+    if score >= 75:
+        verdict = "The cut is strong on the curve."
+    elif score >= 60:
+        verdict = "The cut is workable, but uneven."
+    else:
+        verdict = "The cut is still weak."
+    executive = f"The clearest strength right now is {strongest}. The main gap is {weakest}."
+    banner = "Use the strongest sections as the reference and fix the weakest area first. The detailed notes below show where the curve holds and where it slips."
+    return verdict, executive, banner
+
+
+def _overall_status_en(score: int) -> str:
+    if score >= 75:
+        return "The cut is strong."
+    if score >= 60:
+        return "The cut is okay, but it needs edits."
+    return "The cut is weak."
+
+
+def _simple_overview_text_en(metric_scores: dict[str, int], edit_count: int) -> str:
+    early = metric_scores.get("early_response", 0)
+    sustain = metric_scores.get("sustain", 0)
+    transition = metric_scores.get("transition", 0)
+    stability = metric_scores.get("stability", 0)
+    density = metric_scores.get("density", 0)
+
+    if early >= 75:
+        start_phrase = "The opening is strong"
+    elif early >= 60:
+        start_phrase = "The opening is okay"
+    else:
+        start_phrase = "The opening is weak"
+
+    if sustain < 60:
+        middle_phrase = "then the pace drops"
+    elif transition < 60:
+        middle_phrase = "then the shots change too late"
+    elif stability < 60:
+        middle_phrase = "some frames feel crowded"
+    elif density < 60:
+        middle_phrase = "some visuals feel weak"
+    else:
+        middle_phrase = "then the cut holds together"
+
+    tail = " The weak spots are marked below, and the fixes are listed right under them." if edit_count else " The marked sections are listed below."
+    return f"{start_phrase}, but {middle_phrase}.{tail}"
+
+
+def _simple_banner_text_en(metric_scores: dict[str, int], has_keep_item: bool, edit_count: int) -> str:
+    parts: list[str] = []
+    if has_keep_item:
+        parts.append("Keep the strong sections intact")
+    if metric_scores.get("transition", 0) < 60:
+        parts.append("the weak spots usually improve with earlier shot changes")
+    elif metric_scores.get("stability", 0) < 60:
+        parts.append("the weak spots usually improve when the frame gets cleaner")
+    elif metric_scores.get("density", 0) < 60:
+        parts.append("the weak spots usually improve when the visual gets stronger")
+    else:
+        parts.append("the weak spots are marked below")
+    if edit_count:
+        parts.append("the concrete fixes are listed below")
+    return ". ".join(part[:1].upper() + part[1:] for part in parts) + "."
+
+
+def _build_phase_notes_en(report: dict[str, Any]) -> list[str]:
+    timeline = report.get("timeline")
+    points = timeline.get("points") if isinstance(timeline, dict) else None
+    if not isinstance(points, list) or not points:
+        return []
+
+    scores = [float(point.get("signal_score") or 0.0) for point in points if isinstance(point, dict)]
+    if not scores:
+        return []
+
+    third = max(1, len(scores) // 3)
+    chunks = [scores[:third], scores[third:third * 2], scores[third * 2 :]]
+    labels = ["Opening", "Middle", "Finish"]
+    baseline = sum(scores) / max(len(scores), 1)
+    notes: list[str] = []
+    for label, chunk in zip(labels, chunks):
+        if not chunk:
+            continue
+        ratio = (sum(chunk) / len(chunk)) / max(baseline, 1e-6)
+        if ratio >= 1.08:
+            notes.append(f"{label}: above the cut average. The curve holds well here.")
+        elif ratio >= 0.92:
+            notes.append(f"{label}: close to the cut average. No strong lift, but no major collapse either.")
+        else:
+            notes.append(f"{label}: below the cut average. This phase is worth checking for pacing and presentation.")
+    return notes
+
+
+def _build_compare_verdict_en(best: dict[str, Any], runner_up: dict[str, Any], delta: int) -> str:
+    best_name = str(best.get("name") or best.get("variant_key") or "This cut")
+    runner_name = str(runner_up.get("name") or runner_up.get("variant_key") or "the next cut")
+    if delta >= 8:
+        return f"{best_name} is the clear winner."
+    if delta >= 4:
+        return f"{best_name} is ahead of {runner_name}, but the gap is still editable."
+    return f"{best_name} is slightly ahead, but the race is tight."
+
+
+def _build_compare_executive_summary_en(best: dict[str, Any], runner_up: dict[str, Any], delta: int, top_axes: list[str]) -> str:
+    best_name = str(best.get("name") or best.get("variant_key") or "The leading cut")
+    runner_name = str(runner_up.get("name") or runner_up.get("variant_key") or "the next cut")
+    if top_axes:
+        axis_text = ", ".join(top_axes[:2])
+        return f"{best_name} leads {runner_name} by {delta} points. The clearest separation shows up on {axis_text}."
+    return f"{best_name} leads {runner_name} by {delta} points overall."
+
+
+def _build_common_gaps_en(report: dict[str, Any]) -> list[str]:
+    variants = [item for item in report.get("variants", []) if isinstance(item, dict)]
+    if not variants:
+        return []
+
+    profile_key = str((report.get("analysis_mode") or {}).get("key") or "deep")
+    cutoff = ANALYSIS_MODE_PROFILES.get(profile_key, ANALYSIS_MODE_PROFILES["deep"]).recommendation_cutoff
+    gaps: list[str] = []
+    metric_keys = [metric.get("key") for metric in variants[0].get("metrics", []) if isinstance(metric, dict)]
+    for key in metric_keys:
+        scores = [int((variant.get("metric_lookup") or {}).get(key, 0)) for variant in variants]
+        if not scores:
+            continue
+        avg_score = sum(scores) / len(scores)
+        label = next((metric.get("label") for metric in variants[0].get("metrics", []) if isinstance(metric, dict) and metric.get("key") == key), key)
+        if avg_score < cutoff:
+            gaps.append(f"Every version is still weak on {label}. Even the best cut does not create much headroom there.")
+    return gaps[:3]
+
+
+def _build_compare_banner_en(best: dict[str, Any], common_gaps: list[str]) -> str:
+    strongest = str(best.get("strongest") or "the strongest area")
+    if common_gaps:
+        return f"Use the winner's {strongest} as the reference. Across the whole set, the shared gaps are listed below."
+    return f"Use the winner's {strongest} as the reference and copy its strongest choices into the next edit."
+
+
+def _build_compare_recommendations_en(best: dict[str, Any], common_gaps: list[str]) -> list[str]:
+    best_name = str(best.get("name") or best.get("variant_key") or "the winning cut")
+    strongest = str(best.get("strongest") or "its strongest area")
+    recs = [f"Use {best_name} as the base cut.", f"Protect its edge on {strongest} while you test the next edit."]
+    recs.extend(common_gaps[:2])
+    return recs[:4]
+
+
+def _speech_metric_label_en(metric_key: str, fallback: str) -> str:
+    labels = {
+        "speech_start": "Voice enters",
+        "speech_pace": "Delivery speed",
+        "articulation": "Delivery density",
+        "pause_ratio": "Pauses",
+        "confidence": "Transcript confidence",
+    }
+    return labels.get(metric_key, fallback)
+
+
+def _speech_metric_summary_en(metric_key: str, value: Any) -> str:
+    try:
+        numeric = float(str(value).split()[0])
+    except (ValueError, TypeError):
+        numeric = None
+
+    if metric_key == "speech_start" and numeric is not None:
+        return "The main line enters early enough to support the hook." if numeric <= 2.0 else "The main line enters late, so the opening carries the message without words."
+    if metric_key == "speech_pace" and numeric is not None:
+        return "Delivery moves fast enough for this kind of cut." if numeric >= 2.2 else "Delivery speed is workable, but it could be tighter." if numeric >= 1.5 else "Delivery feels slow for this kind of cut."
+    if metric_key == "articulation" and numeric is not None:
+        return "The spoken part is dense enough to keep moving." if numeric >= 2.8 else "The spoken part is okay, but it could be denser." if numeric >= 2.0 else "The spoken part is sparse, so the message may feel stretched."
+    if metric_key == "pause_ratio" and numeric is not None:
+        return "There are not many long pauses." if numeric <= 0.15 else "There are some pauses, but not too many." if numeric <= 0.28 else "There are too many long pauses between lines."
+    if metric_key == "confidence" and numeric is not None:
+        return "Transcript confidence is strong." if numeric >= 0.85 else "Transcript confidence is usable, but not perfect." if numeric >= 0.65 else "Transcript confidence is weak, so read the speech layer carefully."
+    return ""
+
+
+def _format_seconds_for_copy(seconds: float) -> str:
+    total = int(round(seconds))
+    minutes, secs = divmod(total, 60)
+    return f"{minutes:02d}:{secs:02d}"
+
+
+def _fallback_action_timestamp(report: dict[str, Any]) -> str | None:
+    windows = [item for item in report.get("focus_windows", []) if isinstance(item, dict)]
+    for item in (windows[1] if len(windows) > 1 else None, windows[2] if len(windows) > 2 else None, windows[0] if windows else None):
+        if isinstance(item, dict) and item.get("timestamp"):
+            return str(item["timestamp"])
+    for moment in report.get("drop_moments", []):
+        if isinstance(moment, dict) and moment.get("timestamp"):
+            return str(moment["timestamp"])
+    return None

@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720" role="img" aria-labelledby="title desc">
+  <title id="title">Compare workflow</title>
+  <desc id="desc">Four video variants are compared by overlaying their response curves, then the strongest timeline sections are used as editing references.</desc>
+  <defs>
+    <linearGradient id="panel" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#1d211b"/>
+      <stop offset="1" stop-color="#11140f"/>
+    </linearGradient>
+    <linearGradient id="paper" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#fbf8ef"/>
+      <stop offset="1" stop-color="#eee8dc"/>
+    </linearGradient>
+    <filter id="shadow" x="-12%" y="-18%" width="124%" height="136%">
+      <feDropShadow dx="0" dy="18" stdDeviation="22" flood-color="#000000" flood-opacity="0.28"/>
+    </filter>
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M 32 0 L 0 0 0 32" fill="none" stroke="#fbf7ee" stroke-opacity="0.07" stroke-width="1"/>
+    </pattern>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M1,1 L9,5 L1,9" fill="none" stroke="#f6f1e7" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+  </defs>
+
+  <rect width="1280" height="720" rx="42" fill="#11140f"/>
+  <rect width="1280" height="720" fill="url(#grid)"/>
+
+  <g transform="translate(64 56)">
+    <text x="0" y="0" fill="#f7f1e7" font-family="Manrope, Inter, Arial, sans-serif" font-size="44" font-weight="700" letter-spacing="-2">Workflow A: compare 2-4 versions</text>
+    <text x="0" y="42" fill="#c9c1b4" font-family="Manrope, Inter, Arial, sans-serif" font-size="20">Use the graph as the editing map: keep the strongest section from each version, then build the next cut.</text>
+  </g>
+
+  <g transform="translate(64 140)" filter="url(#shadow)">
+    <rect x="0" y="0" width="1152" height="500" rx="34" fill="url(#panel)" stroke="#f6f1e7" stroke-opacity="0.12"/>
+    <rect x="34" y="36" width="1084" height="240" rx="24" fill="#292d26" stroke="#f6f1e7" stroke-opacity="0.13"/>
+    <rect x="34" y="36" width="1084" height="240" rx="24" fill="url(#grid)" opacity="0.85"/>
+
+    <line x1="78" y1="236" x2="1076" y2="236" stroke="#f6f1e7" stroke-opacity="0.54" stroke-width="1.4" marker-end="url(#arrow)"/>
+    <line x1="78" y1="236" x2="78" y2="68" stroke="#f6f1e7" stroke-opacity="0.54" stroke-width="1.4" marker-end="url(#arrow)"/>
+    <text x="54" y="240" fill="#d8d0c4" font-family="Manrope, Inter, Arial, sans-serif" font-size="13">0</text>
+    <text x="48" y="157" fill="#d8d0c4" font-family="Manrope, Inter, Arial, sans-serif" font-size="13">50</text>
+    <text x="40" y="78" fill="#d8d0c4" font-family="Manrope, Inter, Arial, sans-serif" font-size="13">100</text>
+
+    <polyline points="92,206 160,192 236,145 320,105 414,78 510,88 604,84 690,96 768,112 846,174 926,198 1060,232" fill="none" stroke="#9fc4a3" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+    <polyline points="92,168 170,126 262,98 350,114 430,172 520,198 610,210 718,176 800,122 910,84 1010,128 1060,166" fill="none" stroke="#d9b184" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+    <polyline points="92,122 170,92 258,82 340,104 426,100 520,108 612,106 712,116 808,128 890,160 986,202 1060,218" fill="none" stroke="#c69ab8" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+    <polyline points="92,224 164,214 238,188 310,142 394,94 488,80 582,92 672,124 752,158 838,196 920,228 1060,142" fill="none" stroke="#95a4d3" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <path d="M92,122 C160,92 258,82 340,104 C426,100 520,108 612,106 C712,116 808,128 890,160 C986,202 1030,210 1060,142" fill="none" stroke="#f6f1e7" stroke-width="11" stroke-linecap="round" stroke-linejoin="round" opacity="0.88"/>
+    <text x="790" y="72" fill="#f7f1e7" font-family="Manrope, Inter, Arial, sans-serif" font-size="16" font-weight="700">Take the upper path</text>
+    <text x="790" y="96" fill="#c9c1b4" font-family="Manrope, Inter, Arial, sans-serif" font-size="14">The best next cut borrows the strongest blocks, not one whole video.</text>
+
+    <g transform="translate(34 318)">
+      <g>
+        <rect width="245" height="128" rx="22" fill="url(#paper)" stroke="#171715" stroke-opacity="0.12"/>
+        <circle cx="32" cy="32" r="8" fill="#c69ab8"/>
+        <text x="52" y="38" fill="#171715" font-family="Manrope, Inter, Arial, sans-serif" font-size="18" font-weight="700">Version 1</text>
+        <text x="24" y="76" fill="#5d5a52" font-family="Manrope, Inter, Arial, sans-serif" font-size="15">Best opening block</text>
+      </g>
+      <g transform="translate(275 0)">
+        <rect width="245" height="128" rx="22" fill="url(#paper)" stroke="#171715" stroke-opacity="0.12"/>
+        <circle cx="32" cy="32" r="8" fill="#9fc4a3"/>
+        <text x="52" y="38" fill="#171715" font-family="Manrope, Inter, Arial, sans-serif" font-size="18" font-weight="700">Version 2</text>
+        <text x="24" y="76" fill="#5d5a52" font-family="Manrope, Inter, Arial, sans-serif" font-size="15">Strong middle hold</text>
+      </g>
+      <g transform="translate(550 0)">
+        <rect width="245" height="128" rx="22" fill="url(#paper)" stroke="#171715" stroke-opacity="0.12"/>
+        <circle cx="32" cy="32" r="8" fill="#d9b184"/>
+        <text x="52" y="38" fill="#171715" font-family="Manrope, Inter, Arial, sans-serif" font-size="18" font-weight="700">Version 3</text>
+        <text x="24" y="76" fill="#5d5a52" font-family="Manrope, Inter, Arial, sans-serif" font-size="15">Better late section</text>
+      </g>
+      <g transform="translate(825 0)">
+        <rect width="245" height="128" rx="22" fill="url(#paper)" stroke="#171715" stroke-opacity="0.12"/>
+        <circle cx="32" cy="32" r="8" fill="#95a4d3"/>
+        <text x="52" y="38" fill="#171715" font-family="Manrope, Inter, Arial, sans-serif" font-size="18" font-weight="700">Version 4</text>
+        <text x="24" y="76" fill="#5d5a52" font-family="Manrope, Inter, Arial, sans-serif" font-size="15">Useful fallback idea</text>
+      </g>
+    </g>
+  </g>
+
+  <g transform="translate(64 674)">
+    <text x="0" y="0" fill="#c9c1b4" font-family="Manrope, Inter, Arial, sans-serif" font-size="17">Upload variants of the same creative, compare curves, cut from the strongest sections, then re-test the new edit.</text>
+  </g>
+</svg>
