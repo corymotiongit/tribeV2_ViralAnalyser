@@ -128,15 +128,11 @@ Recommended local setup:
 
 - Windows 10/11 64-bit
 - Python 3.11
-- 32 GB RAM
+- 16 GB RAM
 - Modern 8-core CPU or better
 - NVIDIA GPU
 - 8 GB VRAM minimum, 12 GB+ preferred
 - 30 GB+ free disk space, preferably on SSD
-- Stable internet connection for the first launch
-- Google Chrome for reliable PDF export
-- Hugging Face access if the official TRIBE v2 model page asks for it
-- Optional Ollama installation for local recommendation copy rewriting
 
 ## Runtime data and privacy
 
