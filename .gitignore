@@ -46,6 +46,7 @@ checkpoints/
 *.log
 uvicorn*.log
 deep_test*.html
+.bootstrap/
 tmp/
 temp/
 
@@ -54,4 +55,3 @@ temp/
 Thumbs.db
 .idea/
 .vscode/
-

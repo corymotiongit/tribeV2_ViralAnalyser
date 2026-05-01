@@ -5,6 +5,8 @@ param(
 $appDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $venvPython = Join-Path $appDir ".venv\Scripts\python.exe"
 $requirementsFile = Join-Path $appDir "requirements.txt"
+$bootstrapScript = Join-Path $appDir "bootstrap_models.py"
+$bootstrapReadyFile = Join-Path $appDir ".bootstrap\models-ready.json"
 $hostAddress = "127.0.0.1"
 $preferredPort = 8000
 $fallbackPorts = 8001..8010
@@ -133,6 +135,7 @@ if ($LASTEXITCODE -ne 0) {
 
     Write-Host ""
     Write-Host "Installing Python dependencies. First run can take several minutes." -ForegroundColor Cyan
+    Write-Host "Please keep this terminal open. This only happens during the initial setup." -ForegroundColor Cyan
     & $python -m pip install --upgrade pip
     if ($LASTEXITCODE -ne 0) {
         Stop-WithMessage "Could not upgrade pip inside .venv."
@@ -142,6 +145,24 @@ if ($LASTEXITCODE -ne 0) {
     if ($LASTEXITCODE -ne 0) {
         Stop-WithMessage "Could not install dependencies from requirements.txt."
     }
+}
+
+if (-not (Test-Path $bootstrapReadyFile)) {
+    if (-not (Test-Path $bootstrapScript)) {
+        Stop-WithMessage "bootstrap_models.py not found. Download the full repository archive again."
+    }
+
+    & $python $bootstrapScript
+    if ($LASTEXITCODE -ne 0) {
+        Stop-WithMessage "Initial model setup failed. Fix the issue above, then run Start_TRIBE_Review.cmd again."
+    }
+
+    Write-Host ""
+    Write-Host "Initial setup finished successfully." -ForegroundColor Green
+    Write-Host "Close this window and run Start_TRIBE_Review.cmd one more time to start the app." -ForegroundColor Green
+    Write-Host ""
+    Read-Host "Press Enter to close"
+    exit 0
 }
 
 $port = Get-LaunchPort

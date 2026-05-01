@@ -15,12 +15,16 @@ import pandas as pd
 import torch
 import tribev2.eventstransforms as tribev2_eventstransforms
 
+from runtime_setup import ensure_local_ffmpeg_on_path
+
 
 if hasattr(pathlib, "WindowsPath"):
     pathlib.PosixPath = pathlib.WindowsPath  # type: ignore[assignment]
 
 from tribev2 import TribeModel
 
+
+ensure_local_ffmpeg_on_path()
 
 MODEL_REPO = "facebook/tribev2"
 DEFAULT_CACHE_DIR = Path.home() / "Downloads" / "tribe_cache"

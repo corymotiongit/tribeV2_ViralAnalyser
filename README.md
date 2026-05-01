@@ -70,12 +70,12 @@ Use solo mode when you only have one cut. Look for real dips in the graph, click
 
 Typical edits:
 
-- cut or shorten slow fragments;
-- speed up a section that drags;
-- move the main action or caption earlier;
-- make the subject larger or clearer;
-- remove visual clutter;
-- add a new beat before the graph drops.
+- Cut or shorten slow fragments.
+- Speed up a section that drags.
+- Move the main action or caption earlier.
+- Make the subject larger or clearer.
+- Remove visual clutter.
+- Add a new beat before the graph drops.
 
 Full workflow notes: [docs/WORKFLOWS.md](docs/WORKFLOWS.md)
 
@@ -83,45 +83,51 @@ Full workflow notes: [docs/WORKFLOWS.md](docs/WORKFLOWS.md)
 
 ```text
 .
-├── app.py                         # FastAPI app and report routes
-├── tribe_runtime.py               # TRIBE v2 model loading and inference wrapper
-├── official_report.py             # Official-output report layer
-├── review_engine.py               # Local recommendation and comparison logic
-├── brain_visualization.py         # Brain heatmap visualization data
-├── report_localization.py         # UI/report copy layer
-├── pdf_report.py                  # Chrome-based HTML-to-PDF export
-├── templates/index.html           # Main web UI
-├── static/vendor/                 # Local browser dependencies
-├── runtime_media/                 # Local runtime uploads/reports, ignored by Git
-├── docs/INSTALL_WINDOWS.md        # Windows setup guide
-└── docs/TROUBLESHOOTING.md        # Common issues
+|-- app.py                         # FastAPI app and report routes
+|-- bootstrap_models.py            # First-launch dependency and model preparation
+|-- tribe_runtime.py               # TRIBE v2 model loading and inference wrapper
+|-- official_report.py             # Official-output report layer
+|-- review_engine.py               # Local recommendation and comparison logic
+|-- brain_visualization.py         # Brain heatmap visualization data
+|-- report_localization.py         # UI/report copy layer
+|-- pdf_report.py                  # Chrome-based HTML-to-PDF export
+|-- templates/index.html           # Main web UI
+|-- static/vendor/                 # Local browser dependencies
+|-- runtime_media/                 # Local runtime uploads/reports, ignored by Git
+|-- docs/INSTALL_WINDOWS.md        # Windows setup guide
+`-- docs/TROUBLESHOOTING.md        # Common issues
 ```
 
 ## Quick start on Windows
 
-Read the full setup guide first:
-
-[docs/INSTALL_WINDOWS.md](docs/INSTALL_WINDOWS.md)
-
-Basic launch after dependencies are installed:
+Unzip the repository archive into a normal folder, then run:
 
 ```powershell
-.\start_mvp.ps1
+Start_TRIBE_Review.cmd
 ```
 
-Then open:
+The first launch creates `.venv`, installs Python dependencies, downloads the official TRIBE v2 model files, downloads the Whisper speech model, and prepares local video/audio decoding support. Keep the terminal open during this step.
+
+When the terminal says setup is complete, close it and run:
+
+```powershell
+Start_TRIBE_Review.cmd
+```
+
+The browser should open automatically. If it does not, open:
 
 ```text
 http://127.0.0.1:8000
 ```
 
+Full setup notes: [docs/INSTALL_WINDOWS.md](docs/INSTALL_WINDOWS.md)
+
 ## Requirements
 
 - Python 3.11
-- FFmpeg
+- Internet access on first launch
 - Google Chrome for PDF export
-- Hugging Face access for the official TRIBE v2 model files
-- Official TRIBE v2 Python package installed according to the upstream model page
+- Hugging Face access for the official TRIBE v2 model files, if Hugging Face asks for it
 - Optional NVIDIA CUDA environment for faster inference
 - Optional Ollama for local copy rewriting
 
@@ -136,7 +142,7 @@ That folder is intentionally ignored by Git. Do not commit runtime media, report
 Run a syntax check:
 
 ```powershell
-python -m py_compile app.py tribe_runtime.py speech_runtime.py official_report.py review_engine.py report_localization.py pdf_report.py brain_visualization.py
+python -m py_compile app.py bootstrap_models.py tribe_runtime.py speech_runtime.py official_report.py review_engine.py report_localization.py pdf_report.py brain_visualization.py runtime_setup.py
 ```
 
 Run a smoke test with a local video:

@@ -10,7 +10,10 @@ import torch
 import whisper
 
 from analysis_settings import get_analysis_mode_profile
+from runtime_setup import ensure_local_ffmpeg_on_path
 
+
+ensure_local_ffmpeg_on_path()
 
 DEFAULT_CACHE_DIR = Path.home() / "Downloads" / "tribe_cache"
 WHISPER_CACHE_DIR = Path(os.environ.get("TRIBE_CACHE_DIR", DEFAULT_CACHE_DIR)) / "whisper"

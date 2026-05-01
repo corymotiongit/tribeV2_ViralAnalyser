@@ -6,47 +6,35 @@ This app is designed as a local Windows workflow for reviewing videos with Meta 
 
 - Windows 10/11
 - Python 3.11
-- Git
 - Google Chrome, used for PDF export
-- FFmpeg available in `PATH`
-- Hugging Face access for the official TRIBE v2 model files
+- Internet access on first launch
+- Hugging Face access for the official TRIBE v2 model files, if Hugging Face asks for it
 - Optional: NVIDIA GPU with a CUDA-compatible PyTorch install
 - Optional: Ollama with a local Qwen model for copy rewriting
 
-## 1. Create a virtual environment
+## 1. Start the app
+
+Unzip the repository archive into a normal folder, then run:
 
 ```powershell
-cd C:\path\to\tribe_review_mvp
-py -3.11 -m venv .venv
-.\.venv\Scripts\Activate.ps1
-python -m pip install --upgrade pip
+Start_TRIBE_Review.cmd
 ```
 
-## 2. Install Python dependencies
+The first launch creates `.venv`, installs Python dependencies, downloads the official TRIBE v2 model files, downloads the Whisper speech model, and prepares a local FFmpeg binary.
+
+The terminal will tell you when setup is complete. After the first setup finishes, close the terminal and run `Start_TRIBE_Review.cmd` again. Later launches are much faster.
+
+## 2. Optional Hugging Face login
+
+If the model download fails because Hugging Face asks for access, run this inside the project folder after `.venv` exists:
 
 ```powershell
-pip install -r requirements.txt
+.\.venv\Scripts\huggingface-cli.exe login
 ```
 
-Install the official TRIBE v2 package using the current instructions from the official model page:
+Paste a Hugging Face token that has access to the required model files, then run `Start_TRIBE_Review.cmd` again.
 
-```text
-https://huggingface.co/facebook/tribev2
-```
-
-If you use CUDA, install the PyTorch build that matches your GPU and driver from the official PyTorch selector.
-
-## 3. Configure Hugging Face
-
-TRIBE v2 model files are downloaded from Hugging Face.
-
-```powershell
-huggingface-cli login
-```
-
-Paste a token that has access to the required model files.
-
-## 4. Configure optional cache path
+## 3. Optional cache path
 
 By default, the app uses:
 
@@ -60,19 +48,7 @@ To override it:
 $env:TRIBE_CACHE_DIR = "D:\tribe_cache"
 ```
 
-## 5. Start the app
-
-```powershell
-.\start_mvp.ps1
-```
-
-Then open:
-
-```text
-http://127.0.0.1:8000
-```
-
-## 6. Optional Ollama setup
+## 4. Optional Ollama setup
 
 The app works without Ollama. If Ollama is available, it can be used as a local copy-rewriting layer.
 
@@ -83,4 +59,3 @@ ollama pull qwen3.5:9b
 ```
 
 If no supported Ollama model is found, the app falls back to deterministic built-in copy.
-

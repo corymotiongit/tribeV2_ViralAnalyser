@@ -9,7 +9,5 @@ matplotlib
 moviepy
 huggingface-hub
 openai-whisper
-
-# Install the official TRIBE v2 package according to the upstream model page:
-# https://huggingface.co/facebook/tribev2
-
+imageio-ffmpeg
+tribev2[plotting] @ https://github.com/facebookresearch/tribev2/archive/refs/heads/main.zip
