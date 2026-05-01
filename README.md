@@ -18,7 +18,9 @@ Official model and research sources:
 - [TRIBE v2 GitHub repository](https://github.com/facebookresearch/tribev2)
 - [CC BY-NC 4.0 license](https://creativecommons.org/licenses/by-nc/4.0/)
 
-This repository is a non-commercial community prototype. TRIBE v2 is used under CC BY-NC 4.0. This project is not affiliated with, endorsed by, sponsored by, or officially connected to Meta. It does not claim ownership over TRIBE v2, Meta research materials, model weights, brand assets, uploaded videos, or third-party materials. No sales, paid distribution, sublicensing, or commercial use are intended.
+All inference is run through the official TRIBE v2 model as released by Meta on Hugging Face under the CC BY-NC 4.0 license.
+
+This repository is a non-commercial community prototype built around the official Meta TRIBE v2 model. TRIBE v2 is used under the CC BY-NC 4.0 license, and Meta remains the owner of the model, its weights, and associated research materials. This project is not affiliated with, endorsed by, sponsored by, or officially connected to Meta. It does not claim ownership over TRIBE v2, Meta research materials, model weights, brand assets, uploaded videos, or third-party materials. No sales, paid distribution, sublicensing, or commercial use are intended.
 
 ## What it does
 
@@ -34,9 +36,9 @@ This repository is a non-commercial community prototype. TRIBE v2 is used under 
 
 ## What it is not
 
-- It is not a commercial product.
 - It is not an official Meta application.
 - It is not affiliated with, endorsed by, sponsored by, or officially connected to Meta.
+- It is not a commercial product.
 - It is not a guaranteed virality predictor.
 - It does not measure one specific real viewer.
 - It does not claim ownership over TRIBE v2, Meta research assets, uploaded videos, or any third-party materials.
