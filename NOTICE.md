@@ -17,6 +17,10 @@ The project does not claim ownership over Meta TRIBE v2, the model weights, Meta
 
 TRIBE v2 model weights are not included in this repository. They are downloaded from the official Hugging Face model page by the local setup flow and remain subject to the official TRIBE v2 license.
 
+Bundled browser vendor files under `static/vendor/` include Three.js and OrbitControls from the Three.js project, which is distributed under the MIT license:
+
+https://github.com/mrdoob/three.js/blob/dev/LICENSE
+
 No sales, paid distribution, sublicensing, or commercial use is intended. The app is shared for private evaluation, learning, and experimentation only.
 
 Before any public or commercial use, review the official TRIBE v2 model license and all third-party licenses that apply to the dependencies, model weights, videos, assets, and generated reports.
