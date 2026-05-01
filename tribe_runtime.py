@@ -31,6 +31,11 @@ MODEL_REPO = "facebook/tribev2"
 DEFAULT_CACHE_DIR = Path.home() / "Downloads" / "tribe_cache"
 CACHE_DIR = Path(os.environ.get("TRIBE_CACHE_DIR", DEFAULT_CACHE_DIR))
 MODEL_SNAPSHOT_DIR = CACHE_DIR / "official_model_repo"
+ENABLE_TEXT_EVENTS = os.environ.get("TRIBE_ENABLE_TEXT_EVENTS", "").strip().lower() in {
+    "1",
+    "true",
+    "yes",
+}
 
 
 @dataclass
@@ -94,6 +99,7 @@ class TribeVideoBackend:
             events = model.get_events_dataframe(video_path=str(Path(video_path)))
         finally:
             tribev2_eventstransforms.torch.cuda.is_available = original_cuda_check
+        events = _drop_text_events_unless_enabled(events)
         preds, segments = model.predict(events=events, verbose=False)
         timestamps = [self._segment_timestamp(segment) for segment in segments]
         modalities = sorted({str(item).lower() for item in events["type"].unique().tolist()})
@@ -213,6 +219,15 @@ class TribeVideoBackend:
 
 def _empty_transcript_dataframe() -> pd.DataFrame:
     return pd.DataFrame(columns=["text", "start", "duration", "sequence_id", "sentence"])
+
+
+def _drop_text_events_unless_enabled(events: pd.DataFrame) -> pd.DataFrame:
+    if ENABLE_TEXT_EVENTS or "type" not in events.columns:
+        return events
+    # The app keeps its own local Whisper speech layer. Official TRIBE Word events
+    # require the gated LLaMA text encoder, so skip them by default for clean installs.
+    event_type = events["type"].astype(str).str.lower()
+    return events[event_type != "word"].reset_index(drop=True)
 
 
 def _select_torch_device() -> str:
