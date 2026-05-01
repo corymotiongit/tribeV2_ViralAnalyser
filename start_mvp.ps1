@@ -3,27 +3,47 @@ param(
 )
 
 $appDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-$pythonCandidates = @(
-    (Join-Path $appDir ".venv\Scripts\python.exe"),
-    (Join-Path (Split-Path -Parent $appDir) "tribe311_clean\Scripts\python.exe"),
-    "python"
-)
-$python = $null
-foreach ($candidate in $pythonCandidates) {
-    if ($candidate -eq "python") {
-        $cmd = Get-Command python -ErrorAction SilentlyContinue
-        if ($cmd) {
-            $python = "python"
-            break
-        }
-    } elseif (Test-Path $candidate) {
-        $python = $candidate
-        break
-    }
-}
+$venvPython = Join-Path $appDir ".venv\Scripts\python.exe"
+$requirementsFile = Join-Path $appDir "requirements.txt"
 $hostAddress = "127.0.0.1"
 $preferredPort = 8000
 $fallbackPorts = 8001..8010
+
+function Stop-WithMessage {
+    param(
+        [string]$Message
+    )
+
+    Write-Host ""
+    Write-Host $Message -ForegroundColor Red
+    Write-Host ""
+    Read-Host "Press Enter to close"
+    exit 1
+}
+
+function New-LocalVenv {
+    $siblingPython = Join-Path (Split-Path -Parent $appDir) "tribe311_clean\Scripts\python.exe"
+    if (Test-Path $siblingPython) {
+        & $siblingPython -m venv ".venv"
+        return $LASTEXITCODE -eq 0
+    }
+
+    $pyLauncher = Get-Command py -ErrorAction SilentlyContinue
+    if ($pyLauncher) {
+        & py -3.11 -m venv ".venv"
+        if ($LASTEXITCODE -eq 0) {
+            return $true
+        }
+    }
+
+    $pythonCmd = Get-Command python -ErrorAction SilentlyContinue
+    if ($pythonCmd) {
+        & python -m venv ".venv"
+        return $LASTEXITCODE -eq 0
+    }
+
+    return $false
+}
 
 function Test-AppUrl {
     param(
@@ -92,19 +112,41 @@ function Get-LaunchPort {
     return $null
 }
 
-if (-not $python) {
+Set-Location $appDir
+
+if (-not (Test-Path $venvPython)) {
     Write-Host ""
-    Write-Host "Python not found. Create .venv or install Python 3.11." -ForegroundColor Red
-    exit 1
+    Write-Host "Creating local Python environment: .venv" -ForegroundColor Cyan
+    $venvCreated = New-LocalVenv
+    if (-not $venvCreated -or -not (Test-Path $venvPython)) {
+        Stop-WithMessage "Could not create .venv. Install Python 3.11, then run Start_TRIBE_Review.cmd again."
+    }
 }
 
-Set-Location $appDir
+$python = $venvPython
+
+& $python -c "import fastapi, uvicorn" 2>$null
+if ($LASTEXITCODE -ne 0) {
+    if (-not (Test-Path $requirementsFile)) {
+        Stop-WithMessage "requirements.txt not found. Download the full repository archive again."
+    }
+
+    Write-Host ""
+    Write-Host "Installing Python dependencies. First run can take several minutes." -ForegroundColor Cyan
+    & $python -m pip install --upgrade pip
+    if ($LASTEXITCODE -ne 0) {
+        Stop-WithMessage "Could not upgrade pip inside .venv."
+    }
+
+    & $python -m pip install -r $requirementsFile
+    if ($LASTEXITCODE -ne 0) {
+        Stop-WithMessage "Could not install dependencies from requirements.txt."
+    }
+}
 
 $port = Get-LaunchPort
 if (-not $port) {
-    Write-Host ""
-    Write-Host "Could not find a free port from 8000 to 8010." -ForegroundColor Red
-    exit 1
+    Stop-WithMessage "Could not find a free port from 8000 to 8010."
 }
 
 $url = "http://{0}:{1}" -f $hostAddress, $port
