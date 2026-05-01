@@ -16,19 +16,43 @@ Recommended local setup:
 
 The first launch downloads Python packages, official TRIBE v2 model files, the Whisper speech model, and local video/audio tooling.
 
-## 1. Start the app
+## 1. Download
 
-Unzip the repository archive into a normal folder, then run:
+1. Open the GitHub repository page.
+2. Click the green `Code` button.
+3. Click `Download ZIP`.
+4. Wait for the ZIP file to finish downloading.
 
-```powershell
-Start_TRIBE_Review.cmd
+## 2. Extract
+
+1. Right-click the downloaded ZIP file.
+2. Click `Extract All`.
+3. Choose a normal folder such as `Desktop` or `Downloads`.
+4. Open the extracted folder.
+
+Do not run the app directly from inside the ZIP preview.
+
+## 3. First launch
+
+1. Double-click `Start_TRIBE_Review.cmd`.
+2. A black terminal window will open.
+3. Keep it open. The app is creating its local environment and downloading the model files.
+4. The first setup can take a while.
+5. When the terminal says setup is complete, close the terminal.
+
+## 4. Start the app
+
+Double-click `Start_TRIBE_Review.cmd` again.
+
+The browser should open automatically. If it does not, open this address manually:
+
+```url
+http://127.0.0.1:8000
 ```
 
-The first launch creates `.venv`, installs Python dependencies, downloads the official TRIBE v2 model files, downloads the Whisper speech model, and prepares a local FFmpeg binary.
+Later launches are much faster because the setup files are already installed.
 
-The terminal will tell you when setup is complete. After the first setup finishes, close the terminal and run `Start_TRIBE_Review.cmd` again. Later launches are much faster.
-
-## 2. Optional Hugging Face login
+## 5. Optional Hugging Face login
 
 If the model download fails because Hugging Face asks for access, run this inside the project folder after `.venv` exists:
 
@@ -38,7 +62,7 @@ If the model download fails because Hugging Face asks for access, run this insid
 
 Paste a Hugging Face token that has access to the required model files, then run `Start_TRIBE_Review.cmd` again.
 
-## 3. Optional cache path
+## 6. Optional cache path
 
 By default, the app uses:
 
@@ -52,7 +76,7 @@ To override it:
 $env:TRIBE_CACHE_DIR = "D:\tribe_cache"
 ```
 
-## 4. Optional Ollama setup
+## 7. Optional Ollama setup
 
 The app works without Ollama. If Ollama is available, it can be used as a local copy-rewriting layer.
 

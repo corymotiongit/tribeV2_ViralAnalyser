@@ -103,23 +103,29 @@ Full workflow notes: [docs/WORKFLOWS.md](docs/WORKFLOWS.md)
 
 ## Quick start on Windows
 
-Unzip the repository archive into a normal folder, then run:
+For non-technical users:
+
+1. Click the green `Code` button on GitHub.
+2. Click `Download ZIP`.
+3. Extract the ZIP into a normal folder, for example `Desktop` or `Downloads`.
+4. Open the extracted folder.
+5. Double-click `Start_TRIBE_Review.cmd`.
+6. Keep the black terminal window open while the app prepares itself.
+7. When the terminal says setup is complete, close it.
+8. Double-click `Start_TRIBE_Review.cmd` again.
+9. The app should open in your browser.
+
+The first launch can take a while because the app downloads and installs everything it needs. Later launches are much faster.
+
+Quick command version:
 
 ```powershell
 Start_TRIBE_Review.cmd
 ```
 
-The first launch creates `.venv`, installs Python dependencies, downloads the official TRIBE v2 model files, downloads the Whisper speech model, and prepares local video/audio decoding support. Keep the terminal open during this step.
+If the browser does not open automatically, open:
 
-When the terminal says setup is complete, close it and run:
-
-```powershell
-Start_TRIBE_Review.cmd
-```
-
-The browser should open automatically. If it does not, open:
-
-```text
+```url
 http://127.0.0.1:8000
 ```
 
