@@ -11,6 +11,7 @@ $hostAddress = "127.0.0.1"
 $preferredPort = 8000
 $fallbackPorts = 8001..8010
 $cudaTorchIndexUrl = "https://download.pytorch.org/whl/cu126"
+$minCudaInstallFreeGb = 8
 
 function Stop-WithMessage {
     param(
@@ -146,10 +147,25 @@ function Test-TorchCuda {
     return $LASTEXITCODE -eq 0
 }
 
+function Get-AppDriveFreeGb {
+    try {
+        $root = [System.IO.Path]::GetPathRoot($appDir)
+        $drive = Get-PSDrive -Name $root.Substring(0, 1) -ErrorAction Stop
+        return [math]::Round(($drive.Free / 1GB), 1)
+    } catch {
+        return $null
+    }
+}
+
 function Install-CudaTorch {
     Write-Host ""
     Write-Host "NVIDIA GPU detected, but PyTorch CUDA is not active." -ForegroundColor Yellow
     Write-Host "Installing CUDA-enabled PyTorch. This can take several minutes and only happens when needed." -ForegroundColor Cyan
+
+    $freeGb = Get-AppDriveFreeGb
+    if ($null -ne $freeGb -and $freeGb -lt $minCudaInstallFreeGb) {
+        Stop-WithMessage ("Not enough free disk space to install CUDA-enabled PyTorch. Free at least {0} GB on drive {1}, then run Start_TRIBE_Review.cmd again. Current free space: {2} GB." -f $minCudaInstallFreeGb, ([System.IO.Path]::GetPathRoot($appDir)), $freeGb)
+    }
 
     & $python -m pip install --upgrade pip
     if ($LASTEXITCODE -ne 0) {
@@ -158,7 +174,7 @@ function Install-CudaTorch {
 
     & $python -m pip install --upgrade --force-reinstall torch torchvision torchaudio --index-url $cudaTorchIndexUrl
     if ($LASTEXITCODE -ne 0) {
-        Stop-WithMessage "Could not install CUDA-enabled PyTorch. Update the NVIDIA driver, then run Start_TRIBE_Review.cmd again."
+        Stop-WithMessage "Could not install CUDA-enabled PyTorch. If the terminal shows 'No space left on device', free disk space and run Start_TRIBE_Review.cmd again. Otherwise update the NVIDIA driver and try again."
     }
 
     if (-not (Test-TorchCuda)) {

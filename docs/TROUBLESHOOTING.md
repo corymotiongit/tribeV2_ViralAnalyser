@@ -37,6 +37,12 @@ If a short clip shows a very long ETA during `Encoding video`, PyTorch is probab
 
 On Windows, run `Start_TRIBE_Review.cmd` again. The launcher checks for an NVIDIA GPU and installs CUDA-enabled PyTorch when needed. If CUDA still does not activate, update the NVIDIA driver and run the launcher again.
 
+## `No space left on device`
+
+CUDA-enabled PyTorch is large and can need several extra gigabytes while installing.
+
+Free disk space on the drive where the app is extracted, then run `Start_TRIBE_Review.cmd` again. Keep at least `8 GB` free for the CUDA PyTorch install, and more if the model cache and reports are stored on the same drive.
+
 ## Whisper or audio transcription fails
 
 Check that FFmpeg is installed and available in `PATH`:
