@@ -36,8 +36,13 @@
     <text x="54" y="296" fill="#d8d0c4" font-family="Manrope, Inter, Arial, sans-serif" font-size="13">0</text>
     <text x="48" y="212" fill="#d8d0c4" font-family="Manrope, Inter, Arial, sans-serif" font-size="13">50</text>
     <text x="40" y="132" fill="#d8d0c4" font-family="Manrope, Inter, Arial, sans-serif" font-size="13">100</text>
+    <rect x="468" y="120" width="66" height="172" rx="8" fill="#ef6f5a" opacity="0.12"/>
+    <line x1="468" y1="118" x2="468" y2="292" stroke="#ef6f5a" stroke-width="3" stroke-linecap="round"/>
+    <line x1="534" y1="118" x2="534" y2="292" stroke="#ef6f5a" stroke-width="3" stroke-linecap="round"/>
+    <line x1="468" y1="278" x2="534" y2="278" stroke="#ef6f5a" stroke-width="4" stroke-linecap="round"/>
+    <path d="M468,278 L478,272 M468,278 L478,284" fill="none" stroke="#ef6f5a" stroke-width="3" stroke-linecap="round"/>
+    <path d="M534,278 L524,272 M534,278 L524,284" fill="none" stroke="#ef6f5a" stroke-width="3" stroke-linecap="round"/>
     <polyline points="88,250 142,222 196,178 248,146 304,132 358,142 414,148 468,178 500,286 534,172 574,214 630,288" fill="none" stroke="#9fc4a3" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
-    <circle cx="500" cy="286" r="14" fill="#ef6f5a"/>
 
     <g transform="translate(38 366)">
       <rect width="152" height="70" rx="18" fill="#292d26" stroke="#f6f1e7" stroke-opacity="0.14"/>
