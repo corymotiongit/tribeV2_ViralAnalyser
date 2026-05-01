@@ -52,20 +52,18 @@ class TribeVideoBackend:
 
     @property
     def device(self) -> str:
-        return "cuda" if torch.cuda.is_available() else "cpu"
+        return _select_torch_device()
 
     def load(self) -> TribeModel:
         with self._lock:
             if self._model is None:
                 model_dir = self._resolve_official_model_dir()
+                device = self.device
                 self._model = TribeModel.from_pretrained(
                     model_dir,
                     cache_folder=CACHE_DIR,
-                    device=self.device,
-                    config_update={
-                        "data.num_workers": 0,
-                        "data.batch_size": 1,
-                    },
+                    device=device,
+                    config_update=_build_runtime_config_update(device),
                 )
             return self._model
 
@@ -214,3 +212,28 @@ class TribeVideoBackend:
 
 def _empty_transcript_dataframe() -> pd.DataFrame:
     return pd.DataFrame(columns=["text", "start", "duration", "sequence_id", "sentence"])
+
+
+def _select_torch_device() -> str:
+    if not torch.cuda.is_available() or torch.version.cuda is None:
+        return "cpu"
+    try:
+        torch.empty(1).to("cuda")
+    except Exception:
+        return "cpu"
+    return "cuda"
+
+
+def _build_runtime_config_update(device: str) -> dict[str, Any]:
+    image_batch_size = 4 if device == "cuda" else 1
+    video_batch_size = 4 if device == "cuda" else 1
+    return {
+        "data.num_workers": 0,
+        "data.batch_size": 1,
+        "data.text_feature.device": device,
+        "data.audio_feature.device": device,
+        "data.image_feature.image.device": device,
+        "data.video_feature.image.device": device,
+        "data.image_feature.image.batch_size": image_batch_size,
+        "data.video_feature.image.batch_size": video_batch_size,
+    }

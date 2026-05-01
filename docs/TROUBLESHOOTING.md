@@ -25,6 +25,12 @@ Check that:
 - the token has access to the required model files;
 - the machine has internet access.
 
+## `Torch not compiled with CUDA enabled`
+
+CUDA is optional. The app should automatically run TRIBE v2 on CPU when CUDA is not available.
+
+If this error appears, update to the latest GitHub version and run `Start_TRIBE_Review.cmd` again. Newer builds force the TRIBE feature extractors to use the same verified device as the main model.
+
 ## Whisper or audio transcription fails
 
 Check that FFmpeg is installed and available in `PATH`:
@@ -55,4 +61,3 @@ For safest runs:
 ## Ollama is not installed
 
 Ollama is optional. Without it, the app uses deterministic built-in wording for the recommendation layer.
-
