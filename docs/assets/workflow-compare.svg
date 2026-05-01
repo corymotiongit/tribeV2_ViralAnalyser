@@ -40,21 +40,23 @@
     <text x="48" y="157" fill="#d8d0c4" font-family="Manrope, Inter, Arial, sans-serif" font-size="13">50</text>
     <text x="40" y="78" fill="#d8d0c4" font-family="Manrope, Inter, Arial, sans-serif" font-size="13">100</text>
 
-    <polyline points="92,206 160,192 236,145 320,105 414,78 510,88 604,84 690,96 768,112 846,174 926,198 1060,232" fill="none" stroke="#9fc4a3" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
-    <polyline points="92,168 170,126 262,98 350,114 430,172 520,198 610,210 718,176 800,122 910,84 1010,128 1060,166" fill="none" stroke="#d9b184" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
-    <polyline points="92,122 170,92 258,82 340,104 426,100 520,108 612,106 712,116 808,128 890,160 986,202 1060,218" fill="none" stroke="#c69ab8" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
-    <polyline points="92,224 164,214 238,188 310,142 394,94 488,80 582,92 672,124 752,158 838,196 920,228 1060,142" fill="none" stroke="#95a4d3" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+    <polyline points="92,112 170,82 250,74 330,86 410,120 490,152 570,176 650,190 730,178 810,160 890,186 970,212 1060,224" fill="none" stroke="#c69ab8" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" opacity="0.92"/>
+    <polyline points="92,214 170,190 250,150 330,102 410,72 490,82 570,96 650,86 730,104 810,130 890,176 970,198 1060,214" fill="none" stroke="#9fc4a3" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" opacity="0.92"/>
+    <polyline points="92,178 170,130 250,104 330,96 410,118 490,154 570,198 650,212 730,190 810,150 890,88 970,78 1060,132" fill="none" stroke="#d9b184" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" opacity="0.92"/>
+    <polyline points="92,226 170,220 250,188 330,144 410,104 490,78 570,82 650,110 730,154 810,198 890,222 970,170 1060,92" fill="none" stroke="#95a4d3" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" opacity="0.92"/>
 
-    <path d="M92,122 C160,92 258,82 340,104 C426,100 520,108 612,106 C712,116 808,128 890,160 C986,202 1030,210 1060,142" fill="none" stroke="#f6f1e7" stroke-width="11" stroke-linecap="round" stroke-linejoin="round" opacity="0.88"/>
-    <text x="790" y="72" fill="#f7f1e7" font-family="Manrope, Inter, Arial, sans-serif" font-size="16" font-weight="700">Take the upper path</text>
-    <text x="790" y="96" fill="#c9c1b4" font-family="Manrope, Inter, Arial, sans-serif" font-size="14">The best next cut borrows the strongest blocks, not one whole video.</text>
+    <polyline points="92,112 170,82 250,74 330,86 410,72 490,78 570,82 650,86 730,104 810,130 890,88 970,78 1060,92" fill="none" stroke="#f6f1e7" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
+    <polyline points="92,112 170,82 250,74 330,86 410,72 490,78 570,82 650,86 730,104 810,130 890,88 970,78 1060,92" fill="none" stroke="#fff9ed" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="790" y="70" fill="#f7f1e7" font-family="Manrope, Inter, Arial, sans-serif" font-size="16" font-weight="700">Follow the top edge</text>
+    <text x="790" y="94" fill="#c9c1b4" font-family="Manrope, Inter, Arial, sans-serif" font-size="14">Borrow the strongest moment</text>
+    <text x="790" y="114" fill="#c9c1b4" font-family="Manrope, Inter, Arial, sans-serif" font-size="14">from whichever curve is highest.</text>
 
     <g transform="translate(34 318)">
       <g>
         <rect width="245" height="128" rx="22" fill="url(#paper)" stroke="#171715" stroke-opacity="0.12"/>
         <circle cx="32" cy="32" r="8" fill="#c69ab8"/>
         <text x="52" y="38" fill="#171715" font-family="Manrope, Inter, Arial, sans-serif" font-size="18" font-weight="700">Version 1</text>
-        <text x="24" y="76" fill="#5d5a52" font-family="Manrope, Inter, Arial, sans-serif" font-size="15">Best opening block</text>
+        <text x="24" y="76" fill="#5d5a52" font-family="Manrope, Inter, Arial, sans-serif" font-size="15">Best opening hook</text>
       </g>
       <g transform="translate(275 0)">
         <rect width="245" height="128" rx="22" fill="url(#paper)" stroke="#171715" stroke-opacity="0.12"/>
@@ -66,13 +68,13 @@
         <rect width="245" height="128" rx="22" fill="url(#paper)" stroke="#171715" stroke-opacity="0.12"/>
         <circle cx="32" cy="32" r="8" fill="#d9b184"/>
         <text x="52" y="38" fill="#171715" font-family="Manrope, Inter, Arial, sans-serif" font-size="18" font-weight="700">Version 3</text>
-        <text x="24" y="76" fill="#5d5a52" font-family="Manrope, Inter, Arial, sans-serif" font-size="15">Better late section</text>
+        <text x="24" y="76" fill="#5d5a52" font-family="Manrope, Inter, Arial, sans-serif" font-size="15">Best late payoff</text>
       </g>
       <g transform="translate(825 0)">
         <rect width="245" height="128" rx="22" fill="url(#paper)" stroke="#171715" stroke-opacity="0.12"/>
         <circle cx="32" cy="32" r="8" fill="#95a4d3"/>
         <text x="52" y="38" fill="#171715" font-family="Manrope, Inter, Arial, sans-serif" font-size="18" font-weight="700">Version 4</text>
-        <text x="24" y="76" fill="#5d5a52" font-family="Manrope, Inter, Arial, sans-serif" font-size="15">Useful fallback idea</text>
+        <text x="24" y="76" fill="#5d5a52" font-family="Manrope, Inter, Arial, sans-serif" font-size="15">Final recovery spike</text>
       </g>
     </g>
   </g>
