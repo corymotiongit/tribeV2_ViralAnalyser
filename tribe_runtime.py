@@ -3,6 +3,7 @@ from __future__ import annotations
 import pathlib
 import json
 import os
+import re
 import subprocess
 import shutil
 import threading
@@ -57,8 +58,8 @@ class TribeVideoBackend:
     def load(self) -> TribeModel:
         with self._lock:
             if self._model is None:
-                model_dir = self._resolve_official_model_dir()
                 device = self.device
+                model_dir = self._resolve_official_model_dir(device)
                 self._model = TribeModel.from_pretrained(
                     model_dir,
                     cache_folder=CACHE_DIR,
@@ -67,7 +68,7 @@ class TribeVideoBackend:
                 )
             return self._model
 
-    def _resolve_official_model_dir(self) -> Path:
+    def _resolve_official_model_dir(self, device: str) -> Path:
         if self._model_dir is not None:
             return self._model_dir
 
@@ -80,7 +81,7 @@ class TribeVideoBackend:
             local_dir=MODEL_SNAPSHOT_DIR,
             local_dir_use_symlinks=False,
         )
-        self._model_dir = Path(snapshot_path)
+        self._model_dir = _prepare_runtime_model_dir(Path(snapshot_path), device)
         return self._model_dir
 
     def predict_video(self, video_path: str | Path) -> TribeRunResult:
@@ -237,3 +238,31 @@ def _build_runtime_config_update(device: str) -> dict[str, Any]:
         "data.image_feature.image.batch_size": image_batch_size,
         "data.video_feature.image.batch_size": video_batch_size,
     }
+
+
+def _prepare_runtime_model_dir(snapshot_dir: Path, device: str) -> Path:
+    source_config = snapshot_dir / "config.yaml"
+    source_checkpoint = snapshot_dir / "best.ckpt"
+    if not source_config.exists() or not source_checkpoint.exists():
+        return snapshot_dir
+
+    runtime_dir = snapshot_dir / f"runtime-{device}"
+    runtime_dir.mkdir(parents=True, exist_ok=True)
+
+    runtime_config = runtime_dir / "config.yaml"
+    config_text = source_config.read_text(encoding="utf-8")
+    config_text = re.sub(
+        r"(?m)^(\s*device:\s*)cuda\s*$",
+        lambda match: f"{match.group(1)}{device}",
+        config_text,
+    )
+    runtime_config.write_text(config_text, encoding="utf-8")
+
+    runtime_checkpoint = runtime_dir / "best.ckpt"
+    if not runtime_checkpoint.exists():
+        try:
+            os.link(source_checkpoint, runtime_checkpoint)
+        except OSError:
+            runtime_checkpoint.write_bytes(source_checkpoint.read_bytes())
+
+    return runtime_dir
