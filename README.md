@@ -15,8 +15,10 @@ Official model and research sources:
 
 - [Meta AI publication](https://ai.meta.com/research/publications/a-foundation-model-of-vision-audition-and-language-for-in-silico-neuroscience/)
 - [TRIBE v2 model page](https://huggingface.co/facebook/tribev2)
+- [TRIBE v2 GitHub repository](https://github.com/facebookresearch/tribev2)
+- [CC BY-NC 4.0 license](https://creativecommons.org/licenses/by-nc/4.0/)
 
-This repository is a non-commercial community prototype. It does not claim ownership over TRIBE v2, Meta research materials, model weights, brand assets, uploaded videos, or third-party materials. No sales, paid distribution, sublicensing, or commercial use are intended.
+This repository is a non-commercial community prototype. TRIBE v2 is used under CC BY-NC 4.0. This project is not affiliated with, endorsed by, sponsored by, or officially connected to Meta. It does not claim ownership over TRIBE v2, Meta research materials, model weights, brand assets, uploaded videos, or third-party materials. No sales, paid distribution, sublicensing, or commercial use are intended.
 
 ## What it does
 
@@ -34,6 +36,7 @@ This repository is a non-commercial community prototype. It does not claim owner
 
 - It is not a commercial product.
 - It is not an official Meta application.
+- It is not affiliated with, endorsed by, sponsored by, or officially connected to Meta.
 - It is not a guaranteed virality predictor.
 - It does not measure one specific real viewer.
 - It does not claim ownership over TRIBE v2, Meta research assets, uploaded videos, or any third-party materials.
@@ -159,3 +162,5 @@ python smoke_test.py C:\path\to\test-video.mp4
 No open-source license is granted yet. Treat this repository as private, all-rights-reserved, non-commercial evaluation code unless a license is explicitly added later.
 
 Review the official TRIBE v2 license and all third-party licenses before any redistribution or public use.
+
+TRIBE v2 model weights are not included in this repository. They are downloaded from the official Hugging Face model page by the local setup flow and remain subject to the official TRIBE v2 license.
