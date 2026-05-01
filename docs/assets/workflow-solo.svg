@@ -3,11 +3,11 @@
   <desc id="desc">A single video curve is inspected for dips, then the matching moments are trimmed, sped up, reframed, or reinforced.</desc>
   <defs>
     <linearGradient id="panel" x1="0" x2="0" y1="0" y2="1">
-      <stop offset="0" stop-color="#fbf8ef"/>
-      <stop offset="1" stop-color="#eee8dc"/>
+      <stop offset="0" stop-color="#1d211b"/>
+      <stop offset="1" stop-color="#11140f"/>
     </linearGradient>
     <filter id="shadow" x="-12%" y="-18%" width="124%" height="136%">
-      <feDropShadow dx="0" dy="18" stdDeviation="22" flood-color="#000000" flood-opacity="0.2"/>
+      <feDropShadow dx="0" dy="18" stdDeviation="22" flood-color="#000000" flood-opacity="0.28"/>
     </filter>
     <pattern id="darkGrid" width="32" height="32" patternUnits="userSpaceOnUse">
       <path d="M 32 0 L 0 0 0 32" fill="none" stroke="#fbf7ee" stroke-opacity="0.08" stroke-width="1"/>
@@ -17,16 +17,17 @@
     </marker>
   </defs>
 
-  <rect width="1280" height="720" rx="42" fill="#f6f1e7"/>
+  <rect width="1280" height="720" rx="42" fill="#11140f"/>
+  <rect width="1280" height="720" fill="url(#darkGrid)"/>
 
   <g transform="translate(64 58)">
-    <text x="0" y="0" fill="#171715" font-family="Manrope, Inter, Arial, sans-serif" font-size="44" font-weight="700" letter-spacing="-2">Workflow B: improve one video</text>
-    <text x="0" y="42" fill="#6c675e" font-family="Manrope, Inter, Arial, sans-serif" font-size="20">The graph is the main tool. Use every dip as a timestamp for editing decisions.</text>
+    <text x="0" y="0" fill="#f7f1e7" font-family="Manrope, Inter, Arial, sans-serif" font-size="44" font-weight="700" letter-spacing="-2">Workflow B: improve one video</text>
+    <text x="0" y="42" fill="#c9c1b4" font-family="Manrope, Inter, Arial, sans-serif" font-size="20">The graph is the main tool. Use every dip as a timestamp for editing decisions.</text>
   </g>
 
   <g transform="translate(64 138)" filter="url(#shadow)">
-    <rect x="0" y="0" width="720" height="468" rx="34" fill="url(#panel)" stroke="#171715" stroke-opacity="0.12"/>
-    <text x="38" y="58" fill="#171715" font-family="Manrope, Inter, Arial, sans-serif" font-size="24" font-weight="700">Predicted response over time</text>
+    <rect x="0" y="0" width="720" height="468" rx="34" fill="url(#panel)" stroke="#f6f1e7" stroke-opacity="0.12"/>
+    <text x="38" y="58" fill="#f7f1e7" font-family="Manrope, Inter, Arial, sans-serif" font-size="24" font-weight="700">Predicted response over time</text>
     <rect x="38" y="92" width="644" height="240" rx="22" fill="#292d26"/>
     <rect x="38" y="92" width="644" height="240" rx="22" fill="url(#darkGrid)"/>
 
@@ -39,35 +40,35 @@
     <circle cx="500" cy="286" r="14" fill="#ef6f5a"/>
 
     <g transform="translate(38 366)">
-      <rect width="152" height="70" rx="18" fill="#ffffff" stroke="#171715" stroke-opacity="0.12"/>
-      <text x="20" y="30" fill="#171715" font-family="Manrope, Inter, Arial, sans-serif" font-size="15" font-weight="700">Trim</text>
-      <text x="20" y="52" fill="#6c675e" font-family="Manrope, Inter, Arial, sans-serif" font-size="13">remove dead time</text>
-      <rect x="172" width="152" height="70" rx="18" fill="#ffffff" stroke="#171715" stroke-opacity="0.12"/>
-      <text x="192" y="30" fill="#171715" font-family="Manrope, Inter, Arial, sans-serif" font-size="15" font-weight="700">Speed up</text>
-      <text x="192" y="52" fill="#6c675e" font-family="Manrope, Inter, Arial, sans-serif" font-size="13">tighten the pace</text>
-      <rect x="344" width="152" height="70" rx="18" fill="#ffffff" stroke="#171715" stroke-opacity="0.12"/>
-      <text x="364" y="30" fill="#171715" font-family="Manrope, Inter, Arial, sans-serif" font-size="15" font-weight="700">Reframe</text>
-      <text x="364" y="52" fill="#6c675e" font-family="Manrope, Inter, Arial, sans-serif" font-size="13">make it clearer</text>
-      <rect x="516" width="128" height="70" rx="18" fill="#ffffff" stroke="#171715" stroke-opacity="0.12"/>
-      <text x="536" y="30" fill="#171715" font-family="Manrope, Inter, Arial, sans-serif" font-size="15" font-weight="700">Re-test</text>
-      <text x="536" y="52" fill="#6c675e" font-family="Manrope, Inter, Arial, sans-serif" font-size="13">compare again</text>
+      <rect width="152" height="70" rx="18" fill="#292d26" stroke="#f6f1e7" stroke-opacity="0.14"/>
+      <text x="20" y="30" fill="#f7f1e7" font-family="Manrope, Inter, Arial, sans-serif" font-size="15" font-weight="700">Trim</text>
+      <text x="20" y="52" fill="#c9c1b4" font-family="Manrope, Inter, Arial, sans-serif" font-size="13">remove dead time</text>
+      <rect x="172" width="152" height="70" rx="18" fill="#292d26" stroke="#f6f1e7" stroke-opacity="0.14"/>
+      <text x="192" y="30" fill="#f7f1e7" font-family="Manrope, Inter, Arial, sans-serif" font-size="15" font-weight="700">Speed up</text>
+      <text x="192" y="52" fill="#c9c1b4" font-family="Manrope, Inter, Arial, sans-serif" font-size="13">tighten the pace</text>
+      <rect x="344" width="152" height="70" rx="18" fill="#292d26" stroke="#f6f1e7" stroke-opacity="0.14"/>
+      <text x="364" y="30" fill="#f7f1e7" font-family="Manrope, Inter, Arial, sans-serif" font-size="15" font-weight="700">Reframe</text>
+      <text x="364" y="52" fill="#c9c1b4" font-family="Manrope, Inter, Arial, sans-serif" font-size="13">make it clearer</text>
+      <rect x="516" width="128" height="70" rx="18" fill="#292d26" stroke="#f6f1e7" stroke-opacity="0.14"/>
+      <text x="536" y="30" fill="#f7f1e7" font-family="Manrope, Inter, Arial, sans-serif" font-size="15" font-weight="700">Re-test</text>
+      <text x="536" y="52" fill="#c9c1b4" font-family="Manrope, Inter, Arial, sans-serif" font-size="13">compare again</text>
     </g>
   </g>
 
   <g transform="translate(842 160)">
-    <rect width="350" height="96" rx="24" fill="#171715"/>
+    <rect width="350" height="96" rx="24" fill="#1d211b" stroke="#f6f1e7" stroke-opacity="0.12"/>
     <text x="26" y="38" fill="#f7f1e7" font-family="Manrope, Inter, Arial, sans-serif" font-size="20" font-weight="700">1. Find the dip</text>
     <text x="26" y="66" fill="#c9c1b4" font-family="Manrope, Inter, Arial, sans-serif" font-size="15">Click the curve and inspect that timestamp.</text>
 
-    <rect y="122" width="350" height="96" rx="24" fill="#171715"/>
+    <rect y="122" width="350" height="96" rx="24" fill="#1d211b" stroke="#f6f1e7" stroke-opacity="0.12"/>
     <text x="26" y="160" fill="#f7f1e7" font-family="Manrope, Inter, Arial, sans-serif" font-size="20" font-weight="700">2. Compare nearby frames</text>
     <text x="26" y="188" fill="#c9c1b4" font-family="Manrope, Inter, Arial, sans-serif" font-size="15">Ask why the stronger part reads better.</text>
 
-    <rect y="244" width="350" height="96" rx="24" fill="#171715"/>
+    <rect y="244" width="350" height="96" rx="24" fill="#1d211b" stroke="#f6f1e7" stroke-opacity="0.12"/>
     <text x="26" y="282" fill="#f7f1e7" font-family="Manrope, Inter, Arial, sans-serif" font-size="20" font-weight="700">3. Change one thing</text>
     <text x="26" y="310" fill="#c9c1b4" font-family="Manrope, Inter, Arial, sans-serif" font-size="15">Trim, speed up, move text, or change shot.</text>
 
-    <rect y="366" width="350" height="96" rx="24" fill="#171715"/>
+    <rect y="366" width="350" height="96" rx="24" fill="#1d211b" stroke="#f6f1e7" stroke-opacity="0.12"/>
     <text x="26" y="404" fill="#f7f1e7" font-family="Manrope, Inter, Arial, sans-serif" font-size="20" font-weight="700">4. Run the next test</text>
     <text x="26" y="432" fill="#c9c1b4" font-family="Manrope, Inter, Arial, sans-serif" font-size="15">The graph decides if the edit improved.</text>
   </g>
