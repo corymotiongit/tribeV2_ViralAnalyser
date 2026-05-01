@@ -124,12 +124,25 @@ Full setup notes: [docs/INSTALL_WINDOWS.md](docs/INSTALL_WINDOWS.md)
 
 ## Requirements
 
-- Python 3.11
-- Internet access on first launch
-- Google Chrome for PDF export
-- Hugging Face access for the official TRIBE v2 model files, if Hugging Face asks for it
-- Optional NVIDIA CUDA environment for faster inference
-- Optional Ollama for local copy rewriting
+The app is designed for local Windows use. It can run on CPU, but TRIBE v2 video analysis is compute-heavy, so a stronger machine gives a much better experience.
+
+| Component | Minimum | Recommended |
+| --- | --- | --- |
+| OS | Windows 10/11 64-bit | Windows 11 64-bit |
+| Python | Python 3.11 | Python 3.11 |
+| RAM | 16 GB | 32 GB or more |
+| CPU | Modern 4-core CPU | 8-core CPU or better |
+| GPU | Not required; CPU mode is supported | NVIDIA GPU with CUDA-capable PyTorch for faster inference |
+| Disk space | 15 GB free for environment, model cache, and reports | 30 GB+ free on SSD |
+| Internet | Required on first launch | Stable broadband for first model download |
+| Browser | Any modern browser for the app | Google Chrome for reliable PDF export |
+
+Notes:
+
+- Fresh GitHub downloads include CPU fallback for machines without CUDA.
+- First launch downloads Python packages, official TRIBE v2 files, and the Whisper speech model.
+- Hugging Face access may be required if the official TRIBE v2 model page asks for it.
+- Ollama is optional and only improves local recommendation copy rewriting.
 
 ## Runtime data and privacy
 

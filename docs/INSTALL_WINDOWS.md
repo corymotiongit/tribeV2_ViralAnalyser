@@ -4,13 +4,23 @@ This app is designed as a local Windows workflow for reviewing videos with Meta 
 
 ## Requirements
 
-- Windows 10/11
-- Python 3.11
-- Google Chrome, used for PDF export
-- Internet access on first launch
-- Hugging Face access for the official TRIBE v2 model files, if Hugging Face asks for it
-- Optional: NVIDIA GPU with a CUDA-compatible PyTorch install
-- Optional: Ollama with a local Qwen model for copy rewriting
+| Component | Minimum | Recommended |
+| --- | --- | --- |
+| OS | Windows 10/11 64-bit | Windows 11 64-bit |
+| Python | Python 3.11 | Python 3.11 |
+| RAM | 16 GB | 32 GB or more |
+| CPU | Modern 4-core CPU | 8-core CPU or better |
+| GPU | Not required; CPU mode is supported | NVIDIA GPU with CUDA-capable PyTorch for faster inference |
+| Disk space | 15 GB free | 30 GB+ free on SSD |
+| Internet | Required on first launch | Stable broadband for first model download |
+| Browser | Any modern browser for the app | Google Chrome for reliable PDF export |
+
+Fresh GitHub downloads include CPU fallback for machines without CUDA. The first launch downloads Python packages, official TRIBE v2 model files, the Whisper speech model, and local video/audio tooling.
+
+Optional components:
+
+- Hugging Face login, only if the official model page asks for access.
+- Ollama with a local Qwen model, only for local recommendation copy rewriting.
 
 ## 1. Start the app
 
