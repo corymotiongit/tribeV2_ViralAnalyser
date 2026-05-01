@@ -11,11 +11,12 @@ This app is designed as a local Windows workflow for reviewing videos with Meta 
 | RAM | 16 GB | 32 GB or more |
 | CPU | Modern 4-core CPU | 8-core CPU or better |
 | GPU | Not required; CPU mode is supported | NVIDIA GPU with CUDA-capable PyTorch for faster inference |
+| VRAM | Not required in CPU mode | 8 GB minimum for GPU mode; 12 GB+ recommended |
 | Disk space | 15 GB free | 30 GB+ free on SSD |
 | Internet | Required on first launch | Stable broadband for first model download |
 | Browser | Any modern browser for the app | Google Chrome for reliable PDF export |
 
-Fresh GitHub downloads include CPU fallback for machines without CUDA. The first launch downloads Python packages, official TRIBE v2 model files, the Whisper speech model, and local video/audio tooling.
+Fresh GitHub downloads include CPU fallback for machines without CUDA. If VRAM is low, use CPU mode or shorter clips. The first launch downloads Python packages, official TRIBE v2 model files, the Whisper speech model, and local video/audio tooling.
 
 Optional components:
 

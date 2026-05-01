@@ -133,6 +133,7 @@ The app is designed for local Windows use. It can run on CPU, but TRIBE v2 video
 | RAM | 16 GB | 32 GB or more |
 | CPU | Modern 4-core CPU | 8-core CPU or better |
 | GPU | Not required; CPU mode is supported | NVIDIA GPU with CUDA-capable PyTorch for faster inference |
+| VRAM | Not required in CPU mode | 8 GB minimum for GPU mode; 12 GB+ recommended |
 | Disk space | 15 GB free for environment, model cache, and reports | 30 GB+ free on SSD |
 | Internet | Required on first launch | Stable broadband for first model download |
 | Browser | Any modern browser for the app | Google Chrome for reliable PDF export |
@@ -140,6 +141,7 @@ The app is designed for local Windows use. It can run on CPU, but TRIBE v2 video
 Notes:
 
 - Fresh GitHub downloads include CPU fallback for machines without CUDA.
+- GPU mode is optional. If VRAM is low, use CPU mode or shorter clips.
 - First launch downloads Python packages, official TRIBE v2 files, and the Whisper speech model.
 - Hugging Face access may be required if the official TRIBE v2 model page asks for it.
 - Ollama is optional and only improves local recommendation copy rewriting.
