@@ -31,6 +31,12 @@ CUDA is optional. The app should automatically run TRIBE v2 on CPU when CUDA is 
 
 If this error appears, update to the latest GitHub version and run `Start_TRIBE_Review.cmd` again. Newer builds force the TRIBE feature extractors to use the same verified device as the main model.
 
+## Video encoding is extremely slow
+
+If a short clip shows a very long ETA during `Encoding video`, PyTorch is probably running without CUDA acceleration.
+
+On Windows, run `Start_TRIBE_Review.cmd` again. The launcher checks for an NVIDIA GPU and installs CUDA-enabled PyTorch when needed. If CUDA still does not activate, update the NVIDIA driver and run the launcher again.
+
 ## Whisper or audio transcription fails
 
 Check that FFmpeg is installed and available in `PATH`:

@@ -10,6 +10,7 @@ $bootstrapReadyFile = Join-Path $appDir ".bootstrap\models-ready.json"
 $hostAddress = "127.0.0.1"
 $preferredPort = 8000
 $fallbackPorts = 8001..8010
+$cudaTorchIndexUrl = "https://download.pytorch.org/whl/cu126"
 
 function Stop-WithMessage {
     param(
@@ -114,6 +115,57 @@ function Get-LaunchPort {
     return $null
 }
 
+function Test-NvidiaGpu {
+    $nvidiaSmi = Get-Command nvidia-smi -ErrorAction SilentlyContinue
+    if ($nvidiaSmi) {
+        & nvidia-smi --query-gpu=name --format=csv,noheader 1>$null 2>$null
+        if ($LASTEXITCODE -eq 0) {
+            return $true
+        }
+    }
+
+    try {
+        $controllers = Get-CimInstance Win32_VideoController -ErrorAction Stop
+        foreach ($controller in $controllers) {
+            if ([string]$controller.Name -like "*NVIDIA*") {
+                return $true
+            }
+        }
+    } catch {
+    }
+
+    return $false
+}
+
+function Test-TorchCuda {
+    if (-not (Test-Path $python)) {
+        return $false
+    }
+
+    & $python -c "import torch; raise SystemExit(0 if torch.cuda.is_available() else 1)" 1>$null 2>$null
+    return $LASTEXITCODE -eq 0
+}
+
+function Install-CudaTorch {
+    Write-Host ""
+    Write-Host "NVIDIA GPU detected, but PyTorch CUDA is not active." -ForegroundColor Yellow
+    Write-Host "Installing CUDA-enabled PyTorch. This can take several minutes and only happens when needed." -ForegroundColor Cyan
+
+    & $python -m pip install --upgrade pip
+    if ($LASTEXITCODE -ne 0) {
+        Stop-WithMessage "Could not upgrade pip before installing CUDA-enabled PyTorch."
+    }
+
+    & $python -m pip install --upgrade --force-reinstall torch torchvision torchaudio --index-url $cudaTorchIndexUrl
+    if ($LASTEXITCODE -ne 0) {
+        Stop-WithMessage "Could not install CUDA-enabled PyTorch. Update the NVIDIA driver, then run Start_TRIBE_Review.cmd again."
+    }
+
+    if (-not (Test-TorchCuda)) {
+        Stop-WithMessage "NVIDIA GPU was detected, but PyTorch still cannot use CUDA. Update the NVIDIA driver, then run Start_TRIBE_Review.cmd again."
+    }
+}
+
 Set-Location $appDir
 
 if (-not (Test-Path $venvPython)) {
@@ -126,6 +178,12 @@ if (-not (Test-Path $venvPython)) {
 }
 
 $python = $venvPython
+
+if (Test-NvidiaGpu) {
+    if (-not (Test-TorchCuda)) {
+        Install-CudaTorch
+    }
+}
 
 & $python -c "import fastapi, uvicorn" 2>$null
 if ($LASTEXITCODE -ne 0) {
