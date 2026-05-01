@@ -131,7 +131,7 @@ Recommended local setup:
 - 16 GB RAM
 - Modern 8-core CPU or better
 - NVIDIA GPU
-- 8 GB VRAM minimum, 12 GB+ preferred
+- 6 GB VRAM minimum, 12 GB+ preferred
 - 30 GB+ free disk space, preferably on SSD
 
 ## Runtime data and privacy

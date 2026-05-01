@@ -142,7 +142,7 @@ class TribeVideoBackend:
 
             device = "cuda" if tribev2_eventstransforms.torch.cuda.is_available() else "cpu"
             compute_type = "float16" if device == "cuda" else "int8"
-            batch_size = "16" if device == "cuda" else "4"
+            batch_size = "4"
 
             with tempfile.TemporaryDirectory() as output_dir:
                 cmd = [
@@ -225,8 +225,8 @@ def _select_torch_device() -> str:
 
 
 def _build_runtime_config_update(device: str) -> dict[str, Any]:
-    image_batch_size = 4 if device == "cuda" else 1
-    video_batch_size = 4 if device == "cuda" else 1
+    image_batch_size = 1
+    video_batch_size = 1
     return {
         "data.num_workers": 0,
         "data.batch_size": 1,

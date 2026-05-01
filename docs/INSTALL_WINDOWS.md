@@ -11,7 +11,7 @@ Recommended local setup:
 - 16 GB RAM
 - Modern 8-core CPU or better
 - NVIDIA GPU
-- 8 GB VRAM minimum, 12 GB+ preferred
+- 6 GB VRAM minimum, 12 GB+ preferred
 - 30 GB+ free disk space, preferably on SSD
 
 The first launch downloads Python packages, official TRIBE v2 model files, the Whisper speech model, and local video/audio tooling.
