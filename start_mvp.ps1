@@ -11,6 +11,9 @@ $hostAddress = "127.0.0.1"
 $preferredPort = 8000
 $fallbackPorts = 8001..8010
 $cudaTorchIndexUrl = "https://download.pytorch.org/whl/cu126"
+$torchVersion = "2.6.0"
+$torchvisionVersion = "0.21.0"
+$torchaudioVersion = "2.6.0"
 $minCudaInstallFreeGb = 8
 
 function Stop-WithMessage {
@@ -147,6 +150,15 @@ function Test-TorchCuda {
     return $LASTEXITCODE -eq 0
 }
 
+function Test-PythonDependencies {
+    if (-not (Test-Path $python)) {
+        return $false
+    }
+
+    & $python -c "import re, sys; import fastapi, uvicorn, torch; m = re.match(r'(\d+)\.(\d+)\.(\d+)', torch.__version__); v = tuple(map(int, m.groups())) if m else (0, 0, 0); sys.exit(1) if not ((2, 5, 1) <= v < (2, 7, 0)) else None; import tribev2" 1>$null 2>$null
+    return $LASTEXITCODE -eq 0
+}
+
 function Get-AppDriveFreeGb {
     try {
         $root = [System.IO.Path]::GetPathRoot($appDir)
@@ -172,7 +184,7 @@ function Install-CudaTorch {
         Stop-WithMessage "Could not upgrade pip before installing CUDA-enabled PyTorch."
     }
 
-    & $python -m pip install --upgrade --force-reinstall torch torchvision torchaudio --index-url $cudaTorchIndexUrl
+    & $python -m pip install --upgrade --force-reinstall "torch==$torchVersion" "torchvision==$torchvisionVersion" "torchaudio==$torchaudioVersion" --index-url $cudaTorchIndexUrl
     if ($LASTEXITCODE -ne 0) {
         Stop-WithMessage "Could not install CUDA-enabled PyTorch. If the terminal shows 'No space left on device', free disk space and run Start_TRIBE_Review.cmd again. Otherwise update the NVIDIA driver and try again."
     }
@@ -201,8 +213,7 @@ if (Test-NvidiaGpu) {
     }
 }
 
-& $python -c "import fastapi, uvicorn" 2>$null
-if ($LASTEXITCODE -ne 0) {
+if (-not (Test-PythonDependencies)) {
     if (-not (Test-Path $requirementsFile)) {
         Stop-WithMessage "requirements.txt not found. Download the full repository archive again."
     }
@@ -218,6 +229,12 @@ if ($LASTEXITCODE -ne 0) {
     & $python -m pip install -r $requirementsFile
     if ($LASTEXITCODE -ne 0) {
         Stop-WithMessage "Could not install dependencies from requirements.txt."
+    }
+}
+
+if (Test-NvidiaGpu) {
+    if (-not (Test-TorchCuda)) {
+        Install-CudaTorch
     }
 }
 
