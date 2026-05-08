@@ -7,6 +7,7 @@ from io import BytesIO
 import json
 from pathlib import Path
 import re
+import threading
 from typing import Any
 from uuid import uuid4
 
@@ -16,7 +17,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 import numpy as np
 
-from analysis_settings import DEFAULT_ANALYSIS_MODE
+from analysis_settings import ANALYSIS_MODE_PROFILES, DEFAULT_ANALYSIS_MODE
 from brain_visualization import build_brain_simulation
 from ollama_runtime import simplify_review_copy
 from official_report import generate_official_report
@@ -44,6 +45,7 @@ app.mount("/static", StaticFiles(directory=str(APP_DIR / "static")), name="stati
 backend = TribeVideoBackend()
 speech_backend = SpeechTranscriber()
 REPORTS: OrderedDict[str, dict] = OrderedDict()
+REPORTS_LOCK = threading.Lock()
 MAX_REPORTS = 24
 REPORT_JSON_NAME = "report.json"
 
@@ -337,17 +339,19 @@ def _build_timeline_overlay(variants: list[dict[str, Any]]) -> dict[str, Any]:
 
 
 def _store_report(report_id: str, report: dict) -> None:
-    REPORTS[report_id] = report
-    REPORTS.move_to_end(report_id)
+    with REPORTS_LOCK:
+        REPORTS[report_id] = report
+        REPORTS.move_to_end(report_id)
+        while len(REPORTS) > MAX_REPORTS:
+            REPORTS.popitem(last=False)
     _write_report_file(report_id, report)
-    while len(REPORTS) > MAX_REPORTS:
-        REPORTS.popitem(last=False)
 
 
 def _get_stored_report(report_id: str) -> dict | None:
-    report = REPORTS.get(report_id)
-    if report is not None:
-        return report
+    with REPORTS_LOCK:
+        report = REPORTS.get(report_id)
+        if report is not None:
+            return report
 
     report_path = _report_json_path(report_id)
     if not report_path.exists():
@@ -360,8 +364,11 @@ def _get_stored_report(report_id: str) -> dict | None:
         media_path = _find_media_file(report_id, "v1")
         if media_path:
             loaded["_media_path"] = media_path
-        REPORTS[report_id] = loaded
-        REPORTS.move_to_end(report_id)
+        with REPORTS_LOCK:
+            REPORTS[report_id] = loaded
+            REPORTS.move_to_end(report_id)
+            while len(REPORTS) > MAX_REPORTS:
+                REPORTS.popitem(last=False)
         return loaded
     return None
 
@@ -438,6 +445,11 @@ def _build_editorial_layer(
 
 
 def _normalize_analysis_mode(value: str | None) -> str:
+    if value is None:
+        return DEFAULT_ANALYSIS_MODE
+    candidate = value.strip().lower()
+    if candidate in ANALYSIS_MODE_PROFILES:
+        return candidate
     return DEFAULT_ANALYSIS_MODE
 
 def _seed_editorial_curve_points(review: dict[str, Any], official_result: dict[str, Any]) -> None:

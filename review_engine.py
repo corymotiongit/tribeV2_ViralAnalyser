@@ -121,7 +121,6 @@ def generate_review(
             "description": profile.description,
             "note": profile.ui_note,
         },
-        "signal_note": "Ниже показана интерпретация численного TRIBE-сигнала. Это не встроенные метки модели и не прямой прогноз вирусности.",
         "signal_note": _signal_note(profile),
         "speech": speech_layer,
         "timeline": timeline,
