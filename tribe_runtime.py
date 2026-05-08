@@ -1,16 +1,18 @@
 from __future__ import annotations
 
 import pathlib
+import contextlib
 import json
 import os
 import re
 import subprocess
 import shutil
+import sys
 import threading
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterator
 
 import pandas as pd
 import torch
@@ -18,11 +20,30 @@ import tribev2.eventstransforms as tribev2_eventstransforms
 
 from runtime_setup import ensure_local_ffmpeg_on_path
 
-
-if hasattr(pathlib, "WindowsPath"):
-    pathlib.PosixPath = pathlib.WindowsPath  # type: ignore[assignment]
-
 from tribev2 import TribeModel
+
+
+@contextlib.contextmanager
+def _patch_pathlib_for_checkpoint_load() -> Iterator[None]:
+    """Allow pickle to resolve PosixPath/WindowsPath refs across platforms.
+
+    TRIBE checkpoints may contain pickled `PosixPath`/`WindowsPath` instances
+    that don't natively instantiate on the opposite platform. We swap classes
+    only for the duration of the load so the rest of the app keeps using the
+    native pathlib types.
+    """
+    original_posix = pathlib.PosixPath
+    original_windows = getattr(pathlib, "WindowsPath", None)
+    try:
+        if sys.platform == "win32" and original_windows is not None:
+            pathlib.PosixPath = pathlib.WindowsPath  # type: ignore[assignment]
+        elif original_windows is not None:
+            pathlib.WindowsPath = pathlib.PosixPath  # type: ignore[assignment]
+        yield
+    finally:
+        pathlib.PosixPath = original_posix  # type: ignore[assignment]
+        if original_windows is not None:
+            pathlib.WindowsPath = original_windows  # type: ignore[assignment]
 
 
 ensure_local_ffmpeg_on_path()
@@ -64,13 +85,14 @@ class TribeVideoBackend:
         with self._lock:
             if self._model is None:
                 device = self.device
-                model_dir = self._resolve_official_model_dir(device)
-                self._model = TribeModel.from_pretrained(
-                    model_dir,
-                    cache_folder=CACHE_DIR,
-                    device=device,
-                    config_update=_build_runtime_config_update(device),
-                )
+                with _patch_pathlib_for_checkpoint_load():
+                    model_dir = self._resolve_official_model_dir(device)
+                    self._model = TribeModel.from_pretrained(
+                        model_dir,
+                        cache_folder=CACHE_DIR,
+                        device=device,
+                        config_update=_build_runtime_config_update(device),
+                    )
             return self._model
 
     def _resolve_official_model_dir(self, device: str) -> Path:
@@ -124,15 +146,24 @@ class TribeVideoBackend:
     def _ensure_uvx_on_path() -> None:
         if shutil.which("uvx"):
             return
-        candidates = [
-            Path.home() / "Documents" / "ComfyUI" / ".venv" / "Scripts" / "uvx.exe",
+        env_value = os.environ.get("TRIBE_UVX_PATH", "").strip()
+        candidates: list[Path] = []
+        if env_value:
+            candidates.append(Path(env_value))
+        # Common platform install locations
+        candidates.extend([
             Path.home() / ".local" / "bin" / "uvx",
-        ]
+            Path("/usr/local/bin/uvx"),
+            Path("/opt/homebrew/bin/uvx"),
+        ])
         for candidate in candidates:
-            if candidate.exists():
-                current_path = os.environ.get("PATH", "")
-                os.environ["PATH"] = str(candidate.parent) + os.pathsep + current_path
-                return
+            try:
+                if candidate.exists():
+                    current_path = os.environ.get("PATH", "")
+                    os.environ["PATH"] = str(candidate.parent) + os.pathsep + current_path
+                    return
+            except OSError:
+                continue
 
     @staticmethod
     def _ensure_official_transcript_helper() -> None:
