@@ -118,7 +118,6 @@ def build_brain_simulation(
 
     return {
         "available": True,
-        "message": "Интерактивная 3D-модель predicted TRIBE response: серую поверхность можно вращать мышью, а яркие зоны показывают, где cortical signal усиливается в текущий момент ролика.",
         "message": "Серую модель можно крутить мышью. Яркие пятна показывают, где ролик сейчас выглядит сильнее.",
         "frame_count": len(frames),
         "mesh_level": f"{BRAIN_MESH_LEVEL} detailed surface",
